@@ -1,0 +1,25 @@
+.tarifs-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:48px}
+.tarif-card{background:var(--white);border:1px solid var(--c3);padding:32px;transition:all .35s;position:relative;overflow:hidden}
+.tarif-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--warm2),var(--warm),var(--warm-l));transform:scaleY(0);transform-origin:bottom;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.tarif-card:hover{background:var(--c1);transform:translateY(-4px);box-shadow:0 12px 40px rgba(158,115,72,.1)}
+.tarif-card:hover::before{transform:scaleY(1)}
+.tarif-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--c3)}
+.tarif-ico{font-size:22px}
+.tarif-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--text);line-height:1.2}
+.tarif-desc{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:20px;font-weight:300}
+.tarif-prix-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.tarif-prix{flex:1;min-width:120px;background:var(--c1);border:1px solid var(--c3);padding:12px 16px;text-align:center}
+.tarif-prix-dom{background:var(--warm-pale);border-color:rgba(158,115,72,.25)}
+.prix-label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;font-weight:500}
+.prix-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--warm);line-height:1}
+.tarif-btn{display:block;text-align:center;font-size:12px;color:var(--warm);letter-spacing:.06em;text-decoration:none;font-weight:500;padding-top:12px;border-top:1px solid var(--c3);transition:letter-spacing .3s,color .2s}
+.tarif-card:hover .tarif-btn{letter-spacing:.1em}
+.tarifs-info{background:var(--c1);border:1px solid var(--c3);padding:32px;margin-top:16px}
+.tarifs-info-item{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.tarifs-info-item span{font-size:24px}
+.tarifs-info-item strong{display:block;font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
+.tarifs-info-item p{font-size:14px;color:var(--text3);font-weight:300}
+.tarifs-info-links{display:flex;gap:12px;flex-wrap:wrap}
+.faq-item{padding:28px 0;border-bottom:1px solid var(--c3)}
+.faq-item:last-child{border-bottom:none}
+@media(max-width:768px){.tarifs-grid{grid-template-columns:1fr}.tarifs-info-links{flex-direction:column}}
