@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, mergeApprocheData } from '../store'
 import CoachingPhotoImg from '../components/CoachingPhotoImg'
-import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
+import { supabase, supabaseConfigured, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -112,7 +112,7 @@ function sessionAllowed(session) {
 }
 
 export default function Admin() {
-  const [auth, setAuth] = useState(null)
+  const [auth, setAuth] = useState(() => (supabase ? null : false))
   const [loginEmail, setLoginEmail] = useState(() => ADMIN_EMAIL_ALLOW || '')
   const [pwd, setPwd] = useState('')
   const [loginErr, setLoginErr] = useState(false)
@@ -165,6 +165,7 @@ export default function Admin() {
   }, [auth])
 
   useEffect(() => {
+    if (!supabase) return
     let cancelled = false
     const applySession = async (session) => {
       if (!session) {
@@ -189,6 +190,11 @@ export default function Admin() {
   }, [])
 
   const doLogin = async () => {
+    if (!supabase) {
+      setLoginErr(true)
+      setLoginErrMsg('Supabase n’est pas configuré (variables VITE_SUPABASE_URL / VITE_SUPABASE_KEY).')
+      return
+    }
     const email = loginEmail.trim()
     setLoginErr(false)
     setLoginErrMsg('')
@@ -218,7 +224,7 @@ export default function Admin() {
     }
   }
   const doLogout = async () => {
-    await supabase.auth.signOut()
+    if (supabase) await supabase.auth.signOut()
     setAuth(false)
   }
 
@@ -226,6 +232,10 @@ export default function Admin() {
 
   // ── Sauvegarde avis vers Supabase ──
   const saveAvisSupabase = async () => {
+    if (!supabase) {
+      showToast('Supabase non configuré.')
+      return
+    }
     try {
       const { error: delError } = await supabase.from('avis').delete().neq('id', 0)
       if (delError) throw delError
@@ -261,6 +271,10 @@ export default function Admin() {
   }
 
   const saveGalerieSupabase = async () => {
+    if (!supabase) {
+      showToast('Supabase non configuré.')
+      return
+    }
     try {
       const { error: delError } = await supabase.from('galerie').delete().neq('id', 0)
       if (delError) throw delError
@@ -299,6 +313,10 @@ export default function Admin() {
 
   const changePwd = async () => {
     setMdpMsg(null)
+    if (!supabase) {
+      setMdpMsg({ ok: false, txt: 'Supabase non configuré.' })
+      return
+    }
     if (mdpNew.length < 6) { setMdpMsg({ ok: false, txt: 'Au moins 6 caractères requis.' }); return }
     if (mdpNew !== mdpCf) { setMdpMsg({ ok: false, txt: 'Les mots de passe ne correspondent pas.' }); return }
     const { data: { user } } = await supabase.auth.getUser()
@@ -367,6 +385,11 @@ export default function Admin() {
           <img src={logo} alt="" style={{width:'80px',height:'80px',objectFit:'contain',margin:'0 auto 24px',display:'block',filter:'drop-shadow(0 8px 20px rgba(158,115,72,.25))'}}/>
           <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'28px',fontWeight:400,marginBottom:'6px',color:'var(--text)'}}>Welfare <em style={{fontStyle:'italic',color:'var(--warm)'}}>Coach</em></div>
           <p style={{fontSize:'13px',color:'var(--text3)',marginBottom:'32px'}}>Espace administration — connexion Supabase</p>
+          {!supabaseConfigured && (
+            <div style={{background:'var(--err-pale)',border:'1px solid rgba(192,57,43,.2)',color:'var(--err)',padding:'14px 16px',fontSize:'13px',marginBottom:'20px',textAlign:'left',lineHeight:1.6}}>
+              <strong>Configuration manquante.</strong> Définissez <code style={{fontSize:'11px'}}>VITE_SUPABASE_URL</code> et <code style={{fontSize:'11px'}}>VITE_SUPABASE_KEY</code> (fichier <code style={{fontSize:'11px'}}>.env</code> en local, ou Vercel → Settings → Environment Variables), puis redéployez.
+            </div>
+          )}
           {loginErr && loginErrMsg && (
             <div style={{background:'var(--err-pale)',border:'1px solid rgba(192,57,43,.2)',color:'var(--err)',padding:'10px 14px',fontSize:'13px',marginBottom:'16px',textAlign:'left'}}>{loginErrMsg}</div>
           )}

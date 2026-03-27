@@ -1,15 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY?.trim()
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Supabase env manquantes. Définis VITE_SUPABASE_URL et VITE_SUPABASE_KEY (ex: sur Vercel → Project Settings → Environment Variables).'
-  )
-}
+/** Si false, le site public peut quand même s’afficher (données locales / fallbacks). */
+export const supabaseConfigured = Boolean(supabaseUrl && supabaseKey)
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = supabaseConfigured
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 const parseCsv = (v) =>
   String(v || '')
@@ -19,6 +18,7 @@ const parseCsv = (v) =>
 
 // ---- AVIS ----
 export const getAvis = async () => {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('avis')  // ✅ nom correct
     .select('*')
@@ -28,6 +28,7 @@ export const getAvis = async () => {
 }
 
 export const addAvis = async (avis) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const { data, error } = await supabase
     .from('avis')
     .insert([avis])
@@ -36,6 +37,7 @@ export const addAvis = async (avis) => {
 }
 
 export const deleteAvis = async (id) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const { error } = await supabase
     .from('avis')
     .delete()
@@ -45,6 +47,7 @@ export const deleteAvis = async (id) => {
 
 // ---- ADMIN ----
 export const getAdmin = async (email) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const { data, error } = await supabase
     .from('utilisateurs_administrateur')  // ✅ nom corrigé
     .select('*')
@@ -55,6 +58,7 @@ export const getAdmin = async (email) => {
 }
 
 export const updateAdminPassword = async (email, newHash) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const { error } = await supabase
     .from('utilisateurs_administrateur')  // ✅ nom corrigé
     .update({ password_hash: newHash, password_changed: true })
@@ -71,6 +75,7 @@ export const AVIS_BUCKETS = parseCsv(import.meta.env.VITE_AVIS_BUCKETS)
   .filter((v, i, arr) => arr.indexOf(v) === i)
 
 export const uploadPhoto = async (file, path, { upsert = true } = {}) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   let lastErr = null
   for (const bucket of AVIS_BUCKETS) {
     const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert })
@@ -82,11 +87,13 @@ export const uploadPhoto = async (file, path, { upsert = true } = {}) => {
 
 /** URL publique correcte après upload (utilise le bucket réellement utilisé). */
 export const publicUrlAfterAvisUpload = ({ bucket, path }) => {
+  if (!supabase) return ''
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data.publicUrl
 }
 
 export const getPhotoUrl = (path) => {
+  if (!supabase) return ''
   const bucket = AVIS_BUCKETS[0]
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data.publicUrl
@@ -115,6 +122,7 @@ export const parseAvisStoragePublicUrl = (url) => {
 }
 
 export const deleteAvisPhotoByUrl = async (publicUrl) => {
+  if (!supabase) return { skipped: true, reason: 'no_supabase' }
   if (!publicUrl || typeof publicUrl !== 'string') return { skipped: true, reason: 'empty' }
   const v = publicUrl.trim()
 
@@ -137,6 +145,7 @@ export const deleteAvisPhotoByUrl = async (publicUrl) => {
 }
 
 export const cleanupOrphanAvisPhotos = async (keptPublicUrls) => {
+  if (!supabase) return { deleted: 0 }
   const keep = new Set(
     (keptPublicUrls || [])
       .map((u) => {
@@ -192,6 +201,7 @@ const parseCoachingStoragePublicUrl = (url) => {
 }
 
 export const uploadCoachingPhoto = async (file, path) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   let lastErr = null
   for (const bucket of COACHING_BUCKETS) {
     const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
@@ -202,6 +212,7 @@ export const uploadCoachingPhoto = async (file, path) => {
 }
 
 export const getCoachingPhotoUrl = (path, bucket = COACHING_BUCKET) => {
+  if (!supabase) return ''
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data.publicUrl
 }
@@ -211,11 +222,13 @@ export const resolveCoachingPhotoSrc = (photoUrlOrPath) => {
   const v = photoUrlOrPath.trim()
   if (!v) return ''
   if (/^https?:\/\//i.test(v) || v.startsWith('data:') || v.startsWith('blob:')) return v
+  if (!supabase) return ''
   const { data } = supabase.storage.from(COACHING_BUCKET).getPublicUrl(v)
   return data.publicUrl
 }
 
 export const deleteCoachingPhotoByUrl = async (publicUrl) => {
+  if (!supabase) return { skipped: true, reason: 'no_supabase' }
   const parsed = parseCoachingStoragePublicUrl(publicUrl)
   if (!parsed) return { skipped: true, reason: 'unparseable_url' }
   const { data, error } = await supabase.storage.from(parsed.bucket).remove([parsed.path])
@@ -225,6 +238,7 @@ export const deleteCoachingPhotoByUrl = async (publicUrl) => {
 
 // ---- GALERIE (DB) ----
 export const getGalerie = async () => {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('galerie')
     .select('*')
@@ -234,6 +248,7 @@ export const getGalerie = async () => {
 }
 
 export const upsertGalerie = async (items) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const rows = (items || []).map(({ id, ...rest }) => ({
     id,
     ...rest,
@@ -249,12 +264,14 @@ export const deleteGalerieRow = async (id) => {
 
 // ---- CONTENU PAGES (JSON) : ex. page « Mon approche » ----
 export const getSiteContent = async (id) => {
+  if (!supabase) return null
   const { data, error } = await supabase.from('site_content').select('payload').eq('id', id).maybeSingle()
   if (error) throw error
   return data?.payload ?? null
 }
 
 export const upsertSiteContent = async (id, payload) => {
+  if (!supabase) throw new Error('Supabase non configuré.')
   const { error } = await supabase
     .from('site_content')
     .upsert({ id, payload, updated_at: new Date().toISOString() }, { onConflict: 'id' })
