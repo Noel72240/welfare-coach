@@ -25,8 +25,7 @@ CREATE POLICY "authenticated_full_access_galerie"
   WITH CHECK (true);
 
 -- ── Storage : upload / lecture liste / suppression pour l’admin ─────────────
--- Buckets par défaut du code (supabaseClient.js) : avis-photos, avis - photos,
--- coaching-photos, coching - photos
+-- Buckets (noms exacts comme dans Storage) : vérifier avec select id from storage.buckets;
 
 DROP POLICY IF EXISTS "authenticated_storage_site_buckets" ON storage.objects;
 CREATE POLICY "authenticated_storage_site_buckets"
@@ -38,7 +37,8 @@ CREATE POLICY "authenticated_storage_site_buckets"
       'avis-photos',
       'avis - photos',
       'coaching-photos',
-      'coching - photos'
+      'coching - photos',
+      'galerie'
     )
   )
   WITH CHECK (
@@ -46,6 +46,7 @@ CREATE POLICY "authenticated_storage_site_buckets"
       'avis-photos',
       'avis - photos',
       'coaching-photos',
-      'coching - photos'
+      'coching - photos',
+      'galerie'
     )
   );

@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import { getData } from '../store'
+import { getAvis } from '../supabaseClient'
 import { useReveal, useCountUp, useTilt } from '../hooks/useReveal'
 import './Home.css'
 
@@ -39,7 +40,21 @@ function StatCell({ count, suffix, label }) {
 export default function Home() {
   const infos = getData('infos')
   const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
-  const avis = getData('avis').filter(a => a.visible).slice(0, 3)
+  const [avis, setAvis] = useState(getData('avis').filter(a => a.visible).slice(0, 3))
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const rows = await getAvis()
+        if (!alive) return
+        setAvis((rows || []).filter((a) => a.visible !== false).slice(0, 3))
+      } catch {
+        /* garde le fallback localStorage déjà dans le state initial */
+      }
+    })()
+    return () => { alive = false }
+  }, [])
 
   return (
     <>

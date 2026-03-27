@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
+import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -441,9 +441,8 @@ export default function Admin() {
                         const file = e.target.files[0]; if(!file) return
                         try {
                           const path = `avis-${Date.now()}-${file.name}`
-                          await uploadPhoto(file, path)
-                          // On stocke le PATH (plus fiable) et on résout en URL à l'affichage
-                          updAvis(a.id,'photo_url',path)
+                          const up = await uploadPhoto(file, path)
+                          updAvis(a.id, 'photo_url', publicUrlAfterAvisUpload(up))
                           showToast('Photo uploadée ✓')
                         } catch(err) {
                           console.error(err)

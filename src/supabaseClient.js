@@ -63,7 +63,9 @@ export const updateAdminPassword = async (email, newHash) => {
 }
 
 // ---- PHOTOS ----
-const DEFAULT_AVIS_BUCKETS = ['avis-photos', 'avis - photos']
+// Ordre important : le 1er bucket est utilisé pour les chemins seuls (sans URL complète).
+// En prod le bucket Supabase est souvent « avis - photos » (avec espaces), pas « avis-photos ».
+const DEFAULT_AVIS_BUCKETS = ['avis - photos', 'avis-photos']
 export const AVIS_BUCKETS = parseCsv(import.meta.env.VITE_AVIS_BUCKETS)
   .concat(DEFAULT_AVIS_BUCKETS)
   .filter((v, i, arr) => arr.indexOf(v) === i)
@@ -78,8 +80,13 @@ export const uploadPhoto = async (file, path, { upsert = true } = {}) => {
   throw lastErr || new Error('Upload photo: aucun bucket valide.')
 }
 
+/** URL publique correcte après upload (utilise le bucket réellement utilisé). */
+export const publicUrlAfterAvisUpload = ({ bucket, path }) => {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+  return data.publicUrl
+}
+
 export const getPhotoUrl = (path) => {
-  // construit une URL publique (ne vérifie pas l’existence du fichier)
   const bucket = AVIS_BUCKETS[0]
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data.publicUrl
@@ -93,16 +100,18 @@ export const resolveAvisPhotoSrc = (photoUrlOrPath) => {
   return getPhotoUrl(v)
 }
 
-const AVIS_BUCKET = AVIS_BUCKETS[0]
-
-const extractBucketPathFromPublicUrl = (url) => {
+/** Parse une URL publique Storage avis → { bucket, path } (quel que soit le nom du bucket). */
+export const parseAvisStoragePublicUrl = (url) => {
   if (!url || typeof url !== 'string') return null
-  const marker = `/object/public/${encodeURIComponent(AVIS_BUCKET)}/`
-  const idx = url.indexOf(marker)
-  if (idx === -1) return null
-  const raw = url.slice(idx + marker.length)
-  // URLs can include query params, strip them
-  return raw.split('?')[0] || null
+  for (const bucket of AVIS_BUCKETS) {
+    const marker = `/object/public/${encodeURIComponent(bucket)}/`
+    const idx = url.indexOf(marker)
+    if (idx !== -1) {
+      const path = url.slice(idx + marker.length).split('?')[0] || null
+      if (path) return { bucket, path }
+    }
+  }
+  return null
 }
 
 export const deleteAvisPhotoByUrl = async (publicUrl) => {
@@ -120,18 +129,24 @@ export const deleteAvisPhotoByUrl = async (publicUrl) => {
     throw lastErr || new Error('Suppression photo: aucun bucket valide.')
   }
 
-  // sinon, on essaye de parser le bucket et le path depuis l'URL publique
-  const path = extractBucketPathFromPublicUrl(v)
-  if (!path) return { skipped: true, reason: 'unparseable_url' }
-  const { data, error } = await supabase.storage.from(AVIS_BUCKET).remove([path])
+  const parsed = parseAvisStoragePublicUrl(v)
+  if (!parsed) return { skipped: true, reason: 'unparseable_url' }
+  const { data, error } = await supabase.storage.from(parsed.bucket).remove([parsed.path])
   if (error) throw error
-  return { skipped: false, data, path, bucket: AVIS_BUCKET }
+  return { skipped: false, data, path: parsed.path, bucket: parsed.bucket }
 }
 
 export const cleanupOrphanAvisPhotos = async (keptPublicUrls) => {
   const keep = new Set(
     (keptPublicUrls || [])
-      .map((u) => (typeof u === 'string' && /^https?:\/\//i.test(u) ? extractBucketPathFromPublicUrl(u) : u))
+      .map((u) => {
+        if (typeof u !== 'string' || !u.trim()) return null
+        if (/^https?:\/\//i.test(u)) {
+          const p = parseAvisStoragePublicUrl(u)
+          return p?.path || null
+        }
+        return u.trim()
+      })
       .filter(Boolean)
   )
 

@@ -62,14 +62,8 @@ export default function AvisClients() {
       setErreur(null)
       try {
         const supabaseAvis = await getAvis()
-        if (!supabaseAvis || supabaseAvis.length === 0) {
-          // Fallback localStorage
-          const defaultAvis = getData('avis').filter(a => a.visible)
-          setAvis(defaultAvis)
-        } else {
-          // Supabase : filtrer les visibles
-          setAvis(supabaseAvis.filter(a => a.visible !== false))
-        }
+        // Toujours priorité à Supabase si la requête réussit (même liste vide) — pas de mélange avec le localStorage d’un seul PC
+        setAvis((supabaseAvis || []).filter(a => a.visible !== false))
       } catch (err) {
         console.error('Erreur chargement avis:', err)
         setErreur(err.message)
