@@ -26,12 +26,23 @@ function Particles() {
   return <canvas ref={ref} className="hero-particles" aria-hidden="true" />
 }
 
-function StatCell({ count, suffix, label }) {
-  const numRef = typeof count === 'number' ? useCountUp(count, suffix) : null
+/** Hooks toujours dans le même ordre : pas de useCountUp conditionnel (React #300). */
+function StatCellNumber({ count, suffix, label }) {
+  const numRef = useCountUp(count, suffix)
   const tiltRef = useTilt()
   return (
     <div className="stat-cell" ref={tiltRef}>
       <div className="stat-n"><span ref={numRef}>{count}{suffix}</span></div>
+      <div className="stat-l">{label}</div>
+    </div>
+  )
+}
+
+function StatCellText({ text, label }) {
+  const tiltRef = useTilt()
+  return (
+    <div className="stat-cell" ref={tiltRef}>
+      <div className="stat-n"><span>{text}</span></div>
       <div className="stat-l">{label}</div>
     </div>
   )
@@ -206,10 +217,10 @@ export default function Home() {
 
       {/* STATS */}
       <div className="stats-row">
-        <StatCell count={5} suffix=" ans" label="D'expérience en coaching" />
-        <StatCell count="Sarthe" suffix="" label="À domicile & en ligne" />
-        <StatCell count={100} suffix="%" label="Sans régime restrictif" />
-        <StatCell count={30} suffix=" min" label="1ère séance offerte" />
+        <StatCellNumber count={5} suffix=" ans" label="D'expérience en coaching" />
+        <StatCellText text="Sarthe" label="À domicile & en ligne" />
+        <StatCellNumber count={100} suffix="%" label="Sans régime restrictif" />
+        <StatCellNumber count={30} suffix=" min" label="1ère séance offerte" />
       </div>
 
       {/* SERVICES APERÇU */}
