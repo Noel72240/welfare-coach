@@ -397,8 +397,8 @@ export default function Admin() {
                         const file = e.target.files[0]; if(!file) return
                         try {
                           const path = `galerie-${Date.now()}-${file.name}`
-                          await uploadCoachingPhoto(file, path)
-                          const url = getCoachingPhotoUrl(path)
+                          const up = await uploadCoachingPhoto(file, path)
+                          const url = getCoachingPhotoUrl(up.path, up.bucket)
                           updGal(g.id,'photo_url',url)
                           showToast('Photo uploadée ✓')
                         } catch(err) {

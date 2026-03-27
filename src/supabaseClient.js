@@ -155,7 +155,8 @@ export const cleanupOrphanAvisPhotos = async (keptPublicUrls) => {
 }
 
 // ---- COACHING / APPROCHE PHOTOS ----
-const DEFAULT_COACHING_BUCKETS = ['coaching-photos', 'coching - photos']
+// Mettre d'abord le bucket réellement utilisé en prod pour générer les URLs publiques
+const DEFAULT_COACHING_BUCKETS = ['coching - photos', 'coaching-photos']
 export const COACHING_BUCKETS = parseCsv(import.meta.env.VITE_COACHING_BUCKETS)
   .concat(DEFAULT_COACHING_BUCKETS)
   .filter((v, i, arr) => arr.indexOf(v) === i)
@@ -181,8 +182,8 @@ export const uploadCoachingPhoto = async (file, path) => {
   throw lastErr || new Error('Upload photo coaching: aucun bucket valide.')
 }
 
-export const getCoachingPhotoUrl = (path) => {
-  const { data } = supabase.storage.from(COACHING_BUCKET).getPublicUrl(path)
+export const getCoachingPhotoUrl = (path, bucket = COACHING_BUCKET) => {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data.publicUrl
 }
 
