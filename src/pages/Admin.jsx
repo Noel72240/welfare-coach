@@ -4,8 +4,8 @@ import { getData, setData, DEFAULTS } from '../store'
 import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
 import './Admin.css'
 
-const PWD_KEY = 'wc_pwd', SES_KEY = 'wc_ses'
-const getPwd = () => localStorage.getItem(PWD_KEY) || 'welfare2025'
+/** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
+const ADMIN_EMAIL_ALLOW = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() || ''
 
 // ── Toast ──
 function Toast({ msg, show }) {
@@ -95,10 +95,19 @@ function PanelHeader({ title, sub, onSave, saveLabel='Enregistrer' }) {
 }
 
 // ══════════════════════════════════════════
+function sessionAllowed(session) {
+  if (!session?.user?.email) return false
+  if (!ADMIN_EMAIL_ALLOW) return true
+  return session.user.email.toLowerCase() === ADMIN_EMAIL_ALLOW
+}
+
 export default function Admin() {
-  const [auth, setAuth] = useState(localStorage.getItem(SES_KEY)==='1')
+  const [auth, setAuth] = useState(null)
+  const [loginEmail, setLoginEmail] = useState(() => ADMIN_EMAIL_ALLOW || '')
   const [pwd, setPwd] = useState('')
   const [loginErr, setLoginErr] = useState(false)
+  const [loginErrMsg, setLoginErrMsg] = useState('')
+  const [loginBusy, setLoginBusy] = useState(false)
   const [panel, setPanel] = useState('tarifs')
   const [toast, setToast] = useState(''); const [toastShow, setToastShow] = useState(false)
 
@@ -113,11 +122,63 @@ export default function Admin() {
 
   const showToast = (msg) => { setToast(msg); setToastShow(true); setTimeout(()=>setToastShow(false), 3000) }
 
-  const doLogin = () => {
-    if (pwd === getPwd()) { localStorage.setItem(SES_KEY,'1'); setAuth(true); setLoginErr(false) }
-    else { setLoginErr(true); setPwd('') }
+  useEffect(() => {
+    let cancelled = false
+    const applySession = async (session) => {
+      if (!session) {
+        if (!cancelled) setAuth(false)
+        return
+      }
+      if (!sessionAllowed(session)) {
+        await supabase.auth.signOut()
+        if (!cancelled) setAuth(false)
+        return
+      }
+      if (!cancelled) setAuth(true)
+    }
+    supabase.auth.getSession().then(({ data: { session } }) => applySession(session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(session)
+    })
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const doLogin = async () => {
+    const email = loginEmail.trim()
+    setLoginErr(false)
+    setLoginErrMsg('')
+    if (!email || !pwd) {
+      setLoginErr(true)
+      setLoginErrMsg('Renseignez l’email et le mot de passe.')
+      return
+    }
+    setLoginBusy(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd })
+      if (error) throw error
+      if (!sessionAllowed({ user: data.user })) {
+        await supabase.auth.signOut()
+        setLoginErr(true)
+        setLoginErrMsg('Ce compte n’est pas autorisé à accéder à l’administration.')
+        setPwd('')
+        return
+      }
+      setPwd('')
+    } catch (e) {
+      setLoginErr(true)
+      setLoginErrMsg(e?.message || 'Connexion impossible.')
+      setPwd('')
+    } finally {
+      setLoginBusy(false)
+    }
   }
-  const doLogout = () => { localStorage.removeItem(SES_KEY); setAuth(false) }
+  const doLogout = async () => {
+    await supabase.auth.signOut()
+    setAuth(false)
+  }
 
   const save = (key, data, label) => { setData(key, data); showToast(`${label} sauvegardé${label.endsWith('s')?'s':''} ✓`) }
 
@@ -189,11 +250,20 @@ export default function Admin() {
     saveAvisSupabase()
   }
 
-  const changePwd = () => {
-    if(mdpOld!==getPwd()){setMdpMsg({ok:false,txt:'Mot de passe actuel incorrect.'});return}
-    if(mdpNew.length<6){setMdpMsg({ok:false,txt:'Au moins 6 caractères requis.'});return}
-    if(mdpNew!==mdpCf){setMdpMsg({ok:false,txt:'Les mots de passe ne correspondent pas.'});return}
-    localStorage.setItem(PWD_KEY,mdpNew); setMdpMsg({ok:true,txt:'✓ Mot de passe changé !'}); setMdpOld(''); setMdpNew(''); setMdpCf('')
+  const changePwd = async () => {
+    setMdpMsg(null)
+    if (mdpNew.length < 6) { setMdpMsg({ ok: false, txt: 'Au moins 6 caractères requis.' }); return }
+    if (mdpNew !== mdpCf) { setMdpMsg({ ok: false, txt: 'Les mots de passe ne correspondent pas.' }); return }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.email) { setMdpMsg({ ok: false, txt: 'Session invalide.' }); return }
+    const { error: signErr } = await supabase.auth.signInWithPassword({ email: user.email, password: mdpOld })
+    if (signErr) { setMdpMsg({ ok: false, txt: 'Mot de passe actuel incorrect.' }); return }
+    const { error: upErr } = await supabase.auth.updateUser({ password: mdpNew })
+    if (upErr) { setMdpMsg({ ok: false, txt: upErr.message || 'Échec de la mise à jour.' }); return }
+    setMdpMsg({ ok: true, txt: '✓ Mot de passe changé !' })
+    setMdpOld('')
+    setMdpNew('')
+    setMdpCf('')
   }
 
   // ── Tarifs helpers ──
@@ -240,24 +310,42 @@ export default function Admin() {
     }
   }
 
-  // LOGIN SCREEN
-  if (!auth) return (
-    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#f5f0ea',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{background:'var(--white)',border:'1px solid var(--c3)',padding:'52px 48px',width:'420px',maxWidth:'92vw',boxShadow:'0 24px 80px rgba(158,115,72,.12)',textAlign:'center'}}>
-        <img src={logo} alt="" style={{width:'80px',height:'80px',objectFit:'contain',margin:'0 auto 24px',display:'block',filter:'drop-shadow(0 8px 20px rgba(158,115,72,.25))'}}/>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'28px',fontWeight:400,marginBottom:'6px',color:'var(--text)'}}>Welfare <em style={{fontStyle:'italic',color:'var(--warm)'}}>Coach</em></div>
-        <p style={{fontSize:'13px',color:'var(--text3)',marginBottom:'32px'}}>Espace administration — accès privé</p>
-        {loginErr && <div style={{background:'var(--err-pale)',border:'1px solid rgba(192,57,43,.2)',color:'var(--err)',padding:'10px 14px',fontSize:'13px',marginBottom:'16px',textAlign:'left'}}>Mot de passe incorrect.</div>}
-        <div style={{marginBottom:'16px',textAlign:'left'}}>
-          <label style={{display:'block',fontSize:'10.5px',letterSpacing:'.12em',textTransform:'uppercase',color:'var(--text3)',marginBottom:'8px',fontWeight:500}}>Mot de passe</label>
-          <input type="password" placeholder="••••••••" value={pwd} onChange={e=>setPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&doLogin()} autoComplete="current-password"
-            style={{width:'100%',padding:'14px 18px',background:'var(--c0)',border:'1px solid var(--c3)',fontFamily:"'DM Sans',sans-serif",fontSize:'14px',color:'var(--text)',outline:'none'}}/>
-        </div>
-        <button onClick={doLogin} style={{width:'100%',padding:'16px',background:'var(--warm)',color:'var(--white)',border:'none',fontFamily:"'DM Sans',sans-serif",fontSize:'12px',letterSpacing:'.14em',textTransform:'uppercase',cursor:'pointer',transition:'background .3s'}}>Accéder à l'administration</button>
-        <p style={{fontSize:'11px',color:'var(--text3)',marginTop:'18px',lineHeight:1.6}}>Mot de passe par défaut : <strong>welfare2025</strong></p>
+  // LOGIN / chargement session
+  if (auth === null) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#f5f0ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontSize: '14px', color: 'var(--text3)' }}>Chargement…</p>
       </div>
-    </div>
-  )
+    )
+  }
+  if (!auth) {
+    return (
+      <div style={{position:'fixed',inset:0,zIndex:9999,background:'#f5f0ea',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <div style={{background:'var(--white)',border:'1px solid var(--c3)',padding:'52px 48px',width:'420px',maxWidth:'92vw',boxShadow:'0 24px 80px rgba(158,115,72,.12)',textAlign:'center'}}>
+          <img src={logo} alt="" style={{width:'80px',height:'80px',objectFit:'contain',margin:'0 auto 24px',display:'block',filter:'drop-shadow(0 8px 20px rgba(158,115,72,.25))'}}/>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'28px',fontWeight:400,marginBottom:'6px',color:'var(--text)'}}>Welfare <em style={{fontStyle:'italic',color:'var(--warm)'}}>Coach</em></div>
+          <p style={{fontSize:'13px',color:'var(--text3)',marginBottom:'32px'}}>Espace administration — connexion Supabase</p>
+          {loginErr && loginErrMsg && (
+            <div style={{background:'var(--err-pale)',border:'1px solid rgba(192,57,43,.2)',color:'var(--err)',padding:'10px 14px',fontSize:'13px',marginBottom:'16px',textAlign:'left'}}>{loginErrMsg}</div>
+          )}
+          <div style={{marginBottom:'14px',textAlign:'left'}}>
+            <label style={{display:'block',fontSize:'10.5px',letterSpacing:'.12em',textTransform:'uppercase',color:'var(--text3)',marginBottom:'8px',fontWeight:500}}>Email</label>
+            <input type="email" placeholder="vous@exemple.fr" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&doLogin()} autoComplete="username"
+              style={{width:'100%',padding:'14px 18px',background:'var(--c0)',border:'1px solid var(--c3)',fontFamily:"'DM Sans',sans-serif",fontSize:'14px',color:'var(--text)',outline:'none'}}/>
+          </div>
+          <div style={{marginBottom:'16px',textAlign:'left'}}>
+            <label style={{display:'block',fontSize:'10.5px',letterSpacing:'.12em',textTransform:'uppercase',color:'var(--text3)',marginBottom:'8px',fontWeight:500}}>Mot de passe</label>
+            <input type="password" placeholder="••••••••" value={pwd} onChange={e=>setPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&doLogin()} autoComplete="current-password"
+              style={{width:'100%',padding:'14px 18px',background:'var(--c0)',border:'1px solid var(--c3)',fontFamily:"'DM Sans',sans-serif",fontSize:'14px',color:'var(--text)',outline:'none'}}/>
+          </div>
+          <button type="button" disabled={loginBusy} onClick={doLogin} style={{width:'100%',padding:'16px',background:loginBusy?'var(--c3)':'var(--warm)',color:'var(--white)',border:'none',fontFamily:"'DM Sans',sans-serif",fontSize:'12px',letterSpacing:'.14em',textTransform:'uppercase',cursor:loginBusy?'wait':'pointer',transition:'background .3s'}}>{loginBusy ? 'Connexion…' : 'Accéder à l\'administration'}</button>
+          <p style={{fontSize:'11px',color:'var(--text3)',marginTop:'18px',lineHeight:1.6}}>
+            Compte créé dans le tableau Supabase (Authentication). {ADMIN_EMAIL_ALLOW ? <>Seul <strong>{ADMIN_EMAIL_ALLOW}</strong> est autorisé.</> : <>En production, définissez <code style={{fontSize:'10px'}}>VITE_ADMIN_EMAIL</code> pour limiter l’accès.</>}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const navItems = [
     ['tarifs','💰','Tarifs'],
@@ -543,7 +631,7 @@ export default function Admin() {
               ['📍 Page Contact', 'Modifiez les textes de présentation, l\'adresse, la zone d\'intervention, les horaires et les coordonnées de contact directement depuis cette section.'],
               ['⚙️ Infos générales', 'Votre nom, titre, téléphone, email et Instagram sont utilisés dans toute la navigation, le footer et les pages de contact. Modifiez-les ici.'],
               ['💾 Sauvegarde', 'Chaque section a son propre bouton Enregistrer. Ou utilisez Tout sauvegarder en haut à droite pour enregistrer toutes les modifications en une fois.'],
-              ['🔒 Sécurité', 'Changez le mot de passe par défaut dès la première connexion. Le mot de passe est stocké localement dans votre navigateur.'],
+              ['🔒 Sécurité', 'L’accès se fait avec un compte Supabase Auth (email / mot de passe). Changez le mot de passe ici ou dans le tableau Supabase. La session est gérée par Supabase (pas le mot de passe personnalisé dans le stockage du site).'],
             ].map(([t,d]) => (
               <Card key={t} title={t}><p style={{fontSize:'14px',color:'var(--text2)',lineHeight:'1.85',fontWeight:300}}>{d}</p></Card>
             ))}
