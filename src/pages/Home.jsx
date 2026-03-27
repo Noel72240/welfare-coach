@@ -156,7 +156,7 @@ export default function Home() {
       {/* STATS */}
       <div className="stats-row">
         <StatCell count={5} suffix=" ans" label="D'expérience en coaching" />
-        <StatCell count={200} suffix="+" label="Clients accompagnés" />
+        <StatCell count="Sarthe" suffix="" label="À domicile & en ligne" />
         <StatCell count={100} suffix="%" label="Sans régime restrictif" />
         <StatCell count={30} suffix=" min" label="1ère séance offerte" />
       </div>

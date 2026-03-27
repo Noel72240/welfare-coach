@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, getPhotoUrl, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl } from '../supabaseClient'
+import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
 import './Admin.css'
 
 const PWD_KEY = 'wc_pwd', SES_KEY = 'wc_ses'
@@ -188,8 +188,8 @@ export default function Admin() {
       }
       const path = `coaching-${Date.now()}-${file.name}`
       await uploadCoachingPhoto(file, path)
-      const url = getCoachingPhotoUrl(path)
-      setApproche(a=>({...a,photo:url}))
+      // On stocke le PATH (plus fiable) et on résout en URL à l'affichage
+      setApproche(a=>({...a,photo:path}))
       showToast('Photo uploadée ✓')
     } catch (err) {
       console.error(err)
@@ -292,7 +292,7 @@ export default function Admin() {
                 <Field label="📷 Photo du client (optionnel)">
                   {a.photo_url && (
                     <div style={{marginBottom:'10px',display:'flex',alignItems:'center',gap:'12px'}}>
-                      <img src={a.photo_url} alt="" style={{width:'52px',height:'52px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}}/>
+                      <img src={resolveAvisPhotoSrc(a.photo_url)} alt="" style={{width:'52px',height:'52px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}}/>
                       <button
                         onClick={async () => {
                           try {
@@ -321,8 +321,8 @@ export default function Admin() {
                         try {
                           const path = `avis-${Date.now()}-${file.name}`
                           await uploadPhoto(file, path)
-                          const url = getPhotoUrl(path)
-                          updAvis(a.id,'photo_url',url)
+                          // On stocke le PATH (plus fiable) et on résout en URL à l'affichage
+                          updAvis(a.id,'photo_url',path)
                           showToast('Photo uploadée ✓')
                         } catch(err) {
                           console.error(err)
@@ -348,7 +348,7 @@ export default function Admin() {
             <Card title="📷 Photo personnelle">
               {approche.photo && (
                 <div style={{marginBottom:'16px',textAlign:'center'}}>
-                  <img src={approche.photo} alt="Aperçu" style={{width:'120px',height:'120px',objectFit:'cover',borderRadius:'50%',border:'3px solid var(--c3)'}}/>
+                  <img src={resolveCoachingPhotoSrc(approche.photo)} alt="Aperçu" style={{width:'120px',height:'120px',objectFit:'cover',borderRadius:'50%',border:'3px solid var(--c3)'}}/>
                   <button
                     onClick={async () => {
                       try {
