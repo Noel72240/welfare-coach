@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, upsertGalerie } from '../supabaseClient'
+import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
 import './Admin.css'
 
 const PWD_KEY = 'wc_pwd', SES_KEY = 'wc_ses'
@@ -153,7 +153,22 @@ export default function Admin() {
 
   const saveGalerieSupabase = async () => {
     try {
-      await upsertGalerie(galerie)
+      const { error: delError } = await supabase.from('galerie').delete().neq('id', 0)
+      if (delError) throw delError
+
+      const rows = galerie.map(({ id, titre, texte, photo_url, visible }) => ({
+        id,
+        titre,
+        texte,
+        photo_url,
+        visible,
+      }))
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('galerie').insert(rows)
+        if (insError) throw insError
+      }
+
       setData('galerie', galerie)
       showToast('Galerie sauvegardée dans Supabase ✓')
     } catch (err) {
