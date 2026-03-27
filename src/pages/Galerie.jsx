@@ -1,23 +1,34 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { getData } from '../store'
 import { useReveal } from '../hooks/useReveal'
 import { getGalerie, resolveCoachingPhotoSrc } from '../supabaseClient'
 
-function GalerieCard({ it, idx }) {
+function GalerieCard({ it, idx, onPhotoClick }) {
   const ref = useReveal(idx * 60)
+  const src = it.photo_url ? resolveCoachingPhotoSrc(it.photo_url) : ''
   return (
     <div
       className="reveal"
       ref={ref}
       style={{background:'var(--white)',border:'1px solid var(--c3)',overflow:'hidden'}}
     >
-      {it.photo_url && (
-        <img
-          src={resolveCoachingPhotoSrc(it.photo_url)}
-          alt={it.titre || 'Photo'}
-          style={{width:'100%',height:'240px',objectFit:'cover',display:'block'}}
-          loading="lazy"
-        />
+      {src && (
+        <button
+          type="button"
+          onClick={() => onPhotoClick({ src, titre: it.titre, texte: it.texte })}
+          style={{
+            display:'block', width:'100%', padding:0, margin:0, border:'none', cursor:'zoom-in',
+            background:'var(--c1)', lineHeight:0,
+          }}
+          aria-label={it.titre ? `Agrandir : ${it.titre}` : 'Agrandir la photo'}
+        >
+          <img
+            src={src}
+            alt={it.titre || 'Photo'}
+            style={{width:'100%',height:'240px',objectFit:'cover',display:'block'}}
+            loading="lazy"
+          />
+        </button>
       )}
       <div style={{padding:'18px 18px 20px'}}>
         {it.titre && (
@@ -37,6 +48,15 @@ function GalerieCard({ it, idx }) {
 
 export default function Galerie() {
   const [items, setItems] = useState([])
+  const [lightbox, setLightbox] = useState(null)
+
+  const closeLb = useCallback(() => setLightbox(null), [])
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') closeLb() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [closeLb])
 
   useEffect(() => {
     let alive = true
@@ -62,7 +82,7 @@ export default function Galerie() {
           <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Galerie</div></div>
           <h1 className="reveal" ref={useReveal(80)}>Galerie <em>photos</em></h1>
           <p className="reveal" ref={useReveal(160)} style={{fontSize:'18px',color:'var(--text2)',maxWidth:'720px',marginTop:'20px',fontWeight:300,lineHeight:1.85}}>
-            Quelques images pour illustrer l’accompagnement, l’approche et l’univers du coaching.
+            Quelques images pour illustrer l’accompagnement, l’approche et l’univers du coaching. Cliquez sur une photo pour l’agrandir.
           </p>
         </div>
       </div>
@@ -76,15 +96,58 @@ export default function Galerie() {
               </p>
             </div>
           ) : (
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3, minmax(0, 1fr))',gap:'18px'}}>
+            <div className="galerie-grid">
               {items.map((it, idx) => (
-                <GalerieCard key={it.id} it={it} idx={idx} />
+                <GalerieCard key={it.id} it={it} idx={idx} onPhotoClick={setLightbox} />
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo en grand"
+          style={{
+            position:'fixed', inset:0, zIndex:10050,
+            background:'rgba(26,21,16,.88)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            padding:'24px', cursor:'zoom-out',
+          }}
+          onClick={closeLb}
+        >
+          <button
+            type="button"
+            onClick={closeLb}
+            style={{
+              position:'absolute', top:'18px', right:'18px',
+              width:'44px', height:'44px', border:'none', borderRadius:'50%',
+              background:'rgba(255,255,255,.15)', color:'#fff', fontSize:'22px', cursor:'pointer',
+              lineHeight:1,
+            }}
+            aria-label="Fermer"
+          >
+            ×
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth:'min(96vw, 1200px)', maxHeight:'90vh', textAlign:'center' }}
+          >
+            <img
+              src={lightbox.src}
+              alt={lightbox.titre || ''}
+              style={{ maxWidth:'100%', maxHeight:'85vh', objectFit:'contain', borderRadius:'4px', boxShadow:'0 24px 80px rgba(0,0,0,.35)' }}
+            />
+            {lightbox.titre && (
+              <p style={{ marginTop:'16px', color:'#fff', fontSize:'18px', fontFamily:"'Cormorant Garamond',serif" }}>
+                {lightbox.titre}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }
-

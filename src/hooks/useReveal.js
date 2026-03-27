@@ -5,12 +5,44 @@ export function useReveal(delay = 0) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+
+    const show = () => {
+      el.classList.add('in')
+    }
+
+    // Accessibilité : pas d’attente sur l’animation
+    try {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        show()
+        return
+      }
+    } catch {
+      /* ignore */
+    }
+
     el.style.transitionDelay = `${delay}ms`
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { el.classList.add('in'); io.unobserve(el) }
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' })
+
+    // Si IntersectionObserver ne se déclenche pas (navigateur, extension, viewport),
+    // le contenu restait en opacity:0 → « page blanche » au milieu du site.
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          show()
+          io.unobserve(el)
+        }
+      },
+      { threshold: 0.01, rootMargin: '0px' }
+    )
     io.observe(el)
-    return () => io.disconnect()
+
+    const fallback = window.setTimeout(() => {
+      if (!el.classList.contains('in')) show()
+    }, 2800)
+
+    return () => {
+      clearTimeout(fallback)
+      io.disconnect()
+    }
   }, [delay])
   return ref
 }

@@ -246,3 +246,17 @@ export const deleteGalerieRow = async (id) => {
   const { error } = await supabase.from('galerie').delete().eq('id', id)
   if (error) throw error
 }
+
+// ---- CONTENU PAGES (JSON) : ex. page « Mon approche » ----
+export const getSiteContent = async (id) => {
+  const { data, error } = await supabase.from('site_content').select('payload').eq('id', id).maybeSingle()
+  if (error) throw error
+  return data?.payload ?? null
+}
+
+export const upsertSiteContent = async (id, payload) => {
+  const { error } = await supabase
+    .from('site_content')
+    .upsert({ id, payload, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+  if (error) throw error
+}

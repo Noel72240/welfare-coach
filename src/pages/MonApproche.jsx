@@ -1,35 +1,51 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getData } from '../store'
+import { getData, mergeApprocheData } from '../store'
+import { getSiteContent, resolveCoachingPhotoSrc } from '../supabaseClient'
 import { useReveal } from '../hooks/useReveal'
 import './MonApproche.css'
 
 export default function MonApproche() {
-  const data = getData('approche')
+  const [data, setData] = useState(() => mergeApprocheData(getData('approche')))
   const infos = getData('infos')
   const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
 
+  useEffect(() => {
+    let alive = true
+    getSiteContent('approche')
+      .then((payload) => {
+        if (!alive || payload == null) return
+        setData(mergeApprocheData(payload))
+      })
+      .catch(() => {
+        /* table absente ou erreur réseau : garde localStorage / défauts */
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const sections = Array.isArray(data.sections) ? data.sections : []
+
   return (
     <>
-      {/* PAGE HEADER */}
       <div className="page-header">
         <div className="page-header-inner">
           <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Mon approche</div></div>
-          <h1 className="reveal" ref={useReveal(80)}>{data.titre}</h1>
+          <h1 className="reveal" ref={useReveal(80)}>{data.titre || 'Mon approche'}</h1>
           <p className="reveal" ref={useReveal(160)} style={{fontSize:'18px',color:'var(--text2)',maxWidth:'680px',marginTop:'20px',fontWeight:300,lineHeight:1.85}}>
-            {data.intro}
+            {data.intro || ''}
           </p>
         </div>
       </div>
 
-      {/* PHOTO + INTRO */}
       <section className="sec">
         <div className="wrap">
           <div className="approche-top">
             {data.photo && (
               <div className="approche-photo-wrap reveal-l" ref={useReveal(0)}>
-                <img src={data.photo} alt={data.photo_legende} className="approche-photo" />
-                <p className="approche-photo-legende">{data.photo_legende}</p>
+                <img src={resolveCoachingPhotoSrc(data.photo)} alt={data.photo_legende || ''} className="approche-photo" />
+                {data.photo_legende && <p className="approche-photo-legende">{data.photo_legende}</p>}
               </div>
             )}
             <div className={data.photo ? 'approche-intro-text reveal-r' : 'approche-intro-text-full reveal'} ref={useReveal(100)}>
@@ -45,17 +61,16 @@ export default function MonApproche() {
         </div>
       </section>
 
-      {/* SECTIONS ÉDITABLES */}
-      {data.sections && data.sections.map((s, i) => (
-        <section key={s.id} className={`sec ${i % 2 === 1 ? 'sec-alt' : ''}`}>
+      {sections.map((s, i) => (
+        <section key={s.id || i} className={`sec ${i % 2 === 1 ? 'sec-alt' : ''}`}>
           <div className="wrap-sm">
             <div className={`reveal${i % 2 === 0 ? '-l' : '-r'}`} ref={useReveal(0)}>
               <div className="eyebrow" style={{marginBottom:'16px'}}>
                 {i === 0 ? 'Mon approche' : i === 1 ? 'Pour qui ?' : i === 2 ? 'Déroulement' : i === 3 ? 'Les bénéfices' : 'Formation'}
               </div>
-              <h2 style={{marginBottom:'28px'}}>{s.titre}</h2>
+              <h2 style={{marginBottom:'28px'}}>{s.titre || 'Section'}</h2>
               <div className="approche-texte">
-                {s.texte.split('\n').map((line, j) => {
+                {(String(s.texte || '')).split('\n').map((line, j) => {
                   if (!line.trim()) return null
                   if (line.startsWith('•') || line.match(/^\d+\./)) {
                     return <div key={j} className="approche-list-item">{line}</div>
@@ -68,7 +83,6 @@ export default function MonApproche() {
         </section>
       ))}
 
-      {/* CTA */}
       <section className="sec sec-alt" style={{textAlign:'center'}}>
         <div className="wrap-sm">
           <div className="eyebrow" style={{justifyContent:'center'}} ref={useReveal(0)}>Prête à commencer ?</div>

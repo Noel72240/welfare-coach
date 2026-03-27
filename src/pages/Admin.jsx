@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
-import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, getAvis, getGalerie } from '../supabaseClient'
+import { getData, setData, mergeApprocheData } from '../store'
+import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -139,7 +139,7 @@ export default function Admin() {
     setSyncingRemote(true)
     ;(async () => {
       try {
-        const [r1, r2] = await Promise.allSettled([getAvis(), getGalerie()])
+        const [r1, r2, r3] = await Promise.allSettled([getAvis(), getGalerie(), getSiteContent('approche')])
         if (cancelled) return
         if (r1.status === 'fulfilled' && Array.isArray(r1.value)) {
           setAvis(r1.value)
@@ -149,6 +149,11 @@ export default function Admin() {
           setGalerie(r2.value)
           setData('galerie', r2.value)
         } else if (r2.status === 'rejected') console.warn('Admin: galerie Supabase', r2.reason)
+        if (r3.status === 'fulfilled' && r3.value != null && typeof r3.value === 'object') {
+          const merged = mergeApprocheData(r3.value)
+          setApproche(merged)
+          setData('approche', merged)
+        } else if (r3.status === 'rejected') console.warn('Admin: site_content approche', r3.reason)
       } catch (e) {
         console.warn('Admin: chargement distant', e)
       } finally {
@@ -243,6 +248,17 @@ export default function Admin() {
     }
   }
 
+  const saveApprocheSupabase = async () => {
+    try {
+      await upsertSiteContent('approche', approche)
+      setData('approche', approche)
+      showToast('Page Mon approche enregistrée dans Supabase ✓')
+    } catch (err) {
+      console.error(err)
+      showToast(formatSupabaseError(err))
+    }
+  }
+
   const saveGalerieSupabase = async () => {
     try {
       const { error: delError } = await supabase.from('galerie').delete().neq('id', 0)
@@ -270,10 +286,14 @@ export default function Admin() {
   }
 
   const saveAll = () => {
-    setData('infos',infos); setData('tarifs',tarifs)
-    setData('galerie',galerie)
-    setData('approche',approche); setData('contact',contact)
-    saveAvisSupabase()
+    setData('infos', infos)
+    setData('tarifs', tarifs)
+    setData('galerie', galerie)
+    setData('approche', approche)
+    setData('contact', contact)
+    void saveAvisSupabase()
+    void saveGalerieSupabase()
+    void saveApprocheSupabase()
   }
 
   const changePwd = async () => {
@@ -541,7 +561,7 @@ export default function Admin() {
 
           {/* ── MON APPROCHE ── */}
           {panel==='approche' && <>
-            <PanelHeader title="Page <em>Mon Approche</em>" sub="Modifiez le contenu, la photo et les sections" onSave={()=>save('approche',approche,'Page Mon Approche')} />
+            <PanelHeader title="Page <em>Mon Approche</em>" sub="Contenu synchronisé entre PC (Supabase)" onSave={saveApprocheSupabase} saveLabel="Enregistrer dans Supabase" />
             <Card title="Titre & introduction">
               <Field label="Titre de la page"><Input value={approche.titre} onChange={v=>setApproche({...approche,titre:v})}/></Field>
               <Field label="Introduction (sous le titre)"><Textarea value={approche.intro} onChange={v=>setApproche({...approche,intro:v})} rows={4}/></Field>

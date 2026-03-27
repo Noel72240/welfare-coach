@@ -114,3 +114,14 @@ export function setData(key, value) {
 export function resetData(key) {
   localStorage.removeItem('wc_' + key)
 }
+
+/** Fusionne les données « Mon approche » venant de Supabase avec les défauts (sections jamais vides). */
+export function mergeApprocheData(remote) {
+  const base = DEFAULTS.approche
+  if (!remote || typeof remote !== 'object') return { ...base }
+  return {
+    ...base,
+    ...remote,
+    sections: Array.isArray(remote.sections) && remote.sections.length > 0 ? remote.sections : base.sections,
+  }
+}

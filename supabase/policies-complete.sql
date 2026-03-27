@@ -84,3 +84,23 @@ CREATE POLICY "authenticated_storage_site_buckets"
 -- ouvrent l’upload/suppression à tout le monde avec la clé anon. Préfère les
 -- policies ci-dessus (SELECT anon + ALL authenticated) et supprime les policies
 -- anon trop permissives si tu n’en as plus besoin.
+
+-- ── Table site_content : contenu JSON (page « Mon approche », etc.) ─────────
+
+CREATE TABLE IF NOT EXISTS public.site_content (
+  id text PRIMARY KEY,
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "anon_select_site_content" ON public.site_content;
+CREATE POLICY "anon_select_site_content"
+  ON public.site_content FOR SELECT TO anon
+  USING (true);
+
+DROP POLICY IF EXISTS "authenticated_all_site_content" ON public.site_content;
+CREATE POLICY "authenticated_all_site_content"
+  ON public.site_content FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
