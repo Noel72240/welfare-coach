@@ -22,18 +22,28 @@ export function useReveal(delay = 0) {
 
     el.style.transitionDelay = `${delay}ms`
 
-    // Si IntersectionObserver ne se déclenche pas (navigateur, extension, viewport),
-    // le contenu restait en opacity:0 → « page blanche » au milieu du site.
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          show()
-          io.unobserve(el)
-        }
-      },
-      { threshold: 0.01, rootMargin: '0px' }
-    )
-    io.observe(el)
+    // Certains navigateurs / webviews (mobile, Edge strict) : pas d’IntersectionObserver
+    if (typeof IntersectionObserver === 'undefined') {
+      show()
+      return
+    }
+
+    let io
+    try {
+      io = new IntersectionObserver(
+        ([e]) => {
+          if (e.isIntersecting) {
+            show()
+            io.unobserve(el)
+          }
+        },
+        { threshold: 0.01, rootMargin: '0px' }
+      )
+      io.observe(el)
+    } catch {
+      show()
+      return
+    }
 
     const fallback = window.setTimeout(() => {
       if (!el.classList.contains('in')) show()
@@ -41,7 +51,11 @@ export function useReveal(delay = 0) {
 
     return () => {
       clearTimeout(fallback)
-      io.disconnect()
+      try {
+        io.disconnect()
+      } catch {
+        /* ignore */
+      }
     }
   }, [delay])
   return ref
@@ -72,10 +86,12 @@ export function useCountUp(target, suffix = '') {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting || el._done) return
+
+    const runAnim = () => {
+      if (el._done) return
       el._done = true
-      const dur = 1800; let start = null
+      const dur = 1800
+      let start = null
       const step = (ts) => {
         if (!start) start = ts
         const p = Math.min((ts - start) / dur, 1)
@@ -83,9 +99,32 @@ export function useCountUp(target, suffix = '') {
         if (p < 1) requestAnimationFrame(step)
       }
       requestAnimationFrame(step)
-    }, { threshold: 0.6 })
-    io.observe(el)
-    return () => io.disconnect()
+    }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      runAnim()
+      return
+    }
+
+    let io
+    try {
+      io = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting || el._done) return
+        runAnim()
+      }, { threshold: 0.6 })
+      io.observe(el)
+    } catch {
+      runAnim()
+      return
+    }
+
+    return () => {
+      try {
+        io.disconnect()
+      } catch {
+        /* ignore */
+      }
+    }
   }, [target, suffix])
   return ref
 }

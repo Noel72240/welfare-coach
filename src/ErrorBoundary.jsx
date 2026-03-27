@@ -37,8 +37,8 @@ export default class ErrorBoundary extends React.Component {
             Le site n’a pas pu s’afficher correctement
           </h1>
           <p style={{ marginBottom: '16px', fontSize: '15px' }}>
-            Une erreur technique s’est produite. Cela arrive souvent après une mise à jour du site quand le
-            navigateur garde d’anciens fichiers en cache.
+            Une erreur technique s’est produite. Souvent : cache du navigateur, ou données locales différentes
+            entre deux profils Chrome / Edge / téléphone.
           </p>
           <ol style={{ paddingLeft: '20px', marginBottom: '24px', fontSize: '15px' }}>
             <li style={{ marginBottom: '8px' }}>
