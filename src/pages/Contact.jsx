@@ -164,6 +164,11 @@ export default function Contact() {
                         <input type="checkbox" id="crgpd" checked={form.rgpd} onChange={e=>setForm({...form,rgpd:e.target.checked})} required/>
                         <label htmlFor="crgpd">J'accepte que mes données soient utilisées pour traiter ma demande, conformément à la <Link to="/politique-confidentialite">politique de confidentialité</Link>. *</label>
                       </div>
+                      <p style={{fontSize:'12px',color:'var(--text3)',lineHeight:1.7,marginTop:'10px'}}>
+                        Les informations recueillies via ce formulaire sont utilisées uniquement pour répondre à votre demande.
+                        Elles ne sont en aucun cas transmises à des tiers. Conformément au RGPD, vous pouvez demander l’accès,
+                        la modification ou la suppression de vos données en nous contactant à l’adresse suivante : contact@allotech72.fr.
+                      </p>
                       <button type="submit" className="sub-btn" disabled={loading}>
                         <span>{loading ? 'Envoi en cours…' : 'Envoyer mon message'}</span>
                         {!loading && <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
