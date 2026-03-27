@@ -104,3 +104,7 @@ DROP POLICY IF EXISTS "authenticated_all_site_content" ON public.site_content;
 CREATE POLICY "authenticated_all_site_content"
   ON public.site_content FOR ALL TO authenticated
   USING (true) WITH CHECK (true);
+
+GRANT SELECT ON TABLE public.site_content TO anon;
+GRANT ALL ON TABLE public.site_content TO authenticated;
+GRANT ALL ON TABLE public.site_content TO service_role;
