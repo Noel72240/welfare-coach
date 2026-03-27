@@ -2,23 +2,38 @@ import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://welfarecoach-lombron.fr').replace(/\/+$/, '')
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.welfare-coach.fr').replace(/\/+$/, '')
 
 const routeMeta = {
   '/': {
-    title: 'Welfare Coach — Coach Nutrition & Bien-être · Lombron, Sarthe',
+    title: 'Coach nutrition Sarthe | Welfare Coach à Lombron',
     description:
-      "Johanna, coach en nutrition et bien-être à Lombron (Sarthe). Accompagnement personnalisé pour perdre du poids, retrouver l'énergie et adopter une alimentation durable. Séances en ligne et à domicile.",
+      "Coach nutrition Sarthe : accompagnement personnalisé à Lombron, Le Mans, Connerré et Bonnétable pour perte de poids durable et rééquilibrage alimentaire.",
   },
-  '/le-coaching': {
-    title: "Le coaching — Nutrition & bien-être | Welfare Coach",
+  '/coaching-nutrition-lombron': {
+    title: 'Coaching nutrition Lombron (Sarthe) | Welfare Coach',
     description:
-      "Découvrez le coaching en nutrition : une approche sans régime, progressive et personnalisée pour changer durablement vos habitudes.",
+      "Coach nutrition à Lombron : accompagnement nutritionnel en Sarthe pour retrouver énergie, équilibre alimentaire et bien-être sans régime strict.",
   },
-  '/mon-approche': {
-    title: 'Mon approche — Sans régime, sans culpabilité | Welfare Coach',
+  '/coach-bien-etre-sarthe': {
+    title: 'Coach bien-être Sarthe | Accompagnement à Lombron',
     description:
-      "Une approche bienveillante et concrète pour retrouver une relation apaisée avec l'alimentation et atteindre vos objectifs.",
+      "Coach bien-être à Lombron en Sarthe : suivi personnalisé pour améliorer votre alimentation, votre énergie et votre qualité de vie.",
+  },
+  '/reequilibrage-alimentaire': {
+    title: 'Rééquilibrage alimentaire Sarthe | Welfare Coach',
+    description:
+      "Programme de rééquilibrage alimentaire en Sarthe : habitudes durables, repas équilibrés, accompagnement humain et progressif.",
+  },
+  '/perte-de-poids': {
+    title: 'Perte de poids Sarthe | Méthode durable sans privation',
+    description:
+      "Perte de poids en Sarthe avec une approche sans régime yo-yo : coaching nutritionnel personnalisé à Lombron et Le Mans.",
+  },
+  '/consultation-en-ligne': {
+    title: 'Consultation nutrition en ligne | Welfare Coach',
+    description:
+      "Consultation nutrition en ligne avec coach en Sarthe : suivi pratique, flexible et personnalisé, partout en France.",
   },
   '/tarifs': {
     title: 'Tarifs — Prestations & accompagnements | Welfare Coach',
@@ -30,7 +45,7 @@ const routeMeta = {
     description:
       "Contactez Johanna pour une première séance découverte. Réponse rapide par email ou téléphone.",
   },
-  '/avis-clients': {
+  '/avis': {
     title: 'Avis clients — Témoignages | Welfare Coach',
     description:
       "Des témoignages authentiques de personnes accompagnées en coaching nutrition & bien-être.",
@@ -57,15 +72,23 @@ const routeMeta = {
 
 export default function Seo() {
   const { pathname } = useLocation()
-  const meta = routeMeta[pathname] || routeMeta['/']
+  const legacyMap = {
+    '/le-coaching': '/coaching-nutrition-lombron',
+    '/mon-approche': '/coach-bien-etre-sarthe',
+    '/avis-clients': '/avis',
+  }
+  const normalizedPath = legacyMap[pathname] || pathname
+  const meta = routeMeta[normalizedPath] || routeMeta['/']
   const canonical = `${SITE_URL}${pathname === '/' ? '' : pathname}`
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'ProfessionalService',
+    '@type': 'LocalBusiness',
     name: 'Welfare Coach',
     url: SITE_URL,
-    areaServed: 'Sarthe, France',
+    telephone: '+33783751533',
+    email: 'welfare.coach72@gmail.com',
+    areaServed: ['Sarthe', 'Le Mans', 'Lombron', 'Connerré', 'Bonnétable'],
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Lombron',
@@ -79,9 +102,9 @@ export default function Seo() {
     <Helmet>
       <title>{meta.title}</title>
       <meta name="description" content={meta.description} />
-      <link rel="canonical" href={canonical} />
+      <link rel="canonical" href={`${SITE_URL}${normalizedPath === '/' ? '' : normalizedPath}`} />
 
-      {meta.noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
+      {meta.noIndex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow" />}
 
       <meta property="og:title" content={meta.title} />
       <meta property="og:description" content={meta.description} />

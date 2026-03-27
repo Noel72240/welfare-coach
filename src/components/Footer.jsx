@@ -14,7 +14,7 @@ export function Footer() {
         <div className="ft-top">
           <div className="ft-brand-col">
             <div className="ft-brand">
-              <img src={logo} alt="" aria-hidden="true" />
+              <img src={logo} alt="Logo Welfare Coach" />
               <div>
                 <div className="ft-name">Welfare <em>Coach</em></div>
                 <div className="ft-role">{infos.titre}</div>
@@ -27,11 +27,11 @@ export function Footer() {
             <h5>Navigation</h5>
             <ul>
               <li><Link to="/">Accueil</Link></li>
-              <li><Link to="/le-coaching">Le Coaching</Link></li>
-              <li><Link to="/mon-approche">Mon Approche</Link></li>
+              <li><Link to="/coaching-nutrition-lombron">Le Coaching</Link></li>
+              <li><Link to="/coach-bien-etre-sarthe">Mon Approche</Link></li>
               <li><Link to="/tarifs">Tarifs</Link></li>
               <li><Link to="/contact">Contact</Link></li>
-              <li><Link to="/avis-clients">Avis Clients</Link></li>
+              <li><Link to="/avis">Avis Clients</Link></li>
             </ul>
           </div>
           <div className="ft-col">

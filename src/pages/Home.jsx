@@ -82,7 +82,7 @@ export default function Home() {
             <span>Séance découverte offerte</span>
             <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
-          <Link to="/le-coaching" className="btn-ghost2">
+          <Link to="/coaching-nutrition-lombron" className="btn-ghost2">
             <span>Découvrir le coaching</span>
             <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
@@ -123,7 +123,7 @@ export default function Home() {
               <p style={{fontSize:'16px',color:'var(--text2)',lineHeight:'1.9',marginBottom:'36px',fontWeight:300}}>
                 Installée à <strong>Lombron</strong>, j'accompagne les habitants de la Sarthe et des alentours (Le Mans, Connerré, Bonnétable, Savigné-l'Évêque…), en présentiel ou à distance selon vos préférences.
               </p>
-              <Link to="/le-coaching" className="btn btn-solid">
+              <Link to="/coaching-nutrition-lombron" className="btn btn-solid">
                 <span>En savoir plus</span>
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
@@ -206,7 +206,7 @@ export default function Home() {
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:'40px'}}>
-              <Link to="/avis-clients" className="btn btn-outline">
+              <Link to="/avis" className="btn btn-outline">
                 <span>Voir tous les avis</span>
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>

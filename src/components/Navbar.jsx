@@ -20,13 +20,13 @@ export default function Navbar() {
   const toggle = () => { const n = !open; setOpen(n); document.body.style.overflow = n ? 'hidden' : '' }
   const isA = (p) => location.pathname === p
 
-  const links = [['/', 'Accueil'],['/le-coaching', 'Le Coaching'],['/mon-approche', 'Mon Approche'],['/tarifs', 'Tarifs'],['/galerie', 'Galerie'],['/contact', 'Contact'],['/avis-clients', 'Avis Clients']]
+  const links = [['/', 'Accueil'],['/coaching-nutrition-lombron', 'Le Coaching'],['/coach-bien-etre-sarthe', 'Mon Approche'],['/tarifs', 'Tarifs'],['/galerie', 'Galerie'],['/contact', 'Contact'],['/avis', 'Avis Clients']]
 
   return (
     <>
       <nav className={`navbar ${solid ? 'solid' : ''}`}>
         <Link to="/" className="nav-logo">
-          <img src={logo} alt="" aria-hidden="true" />
+          <img src={logo} alt="Logo Welfare Coach" />
           <div className="nav-brand-wrap">
             <span className="nav-brand">Welfare <em>Coach</em></span>
             <span className="nav-subtitle">{infos.titre}</span>
