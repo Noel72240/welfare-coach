@@ -1,32 +1,32 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { getData } from '../store'
 import { useReveal } from '../hooks/useReveal'
-import { getGalerie, resolveCoachingPhotoSrc } from '../supabaseClient'
+import CoachingPhotoImg from '../components/CoachingPhotoImg'
+import { getGalerie } from '../supabaseClient'
 
 function GalerieCard({ it, idx, onPhotoClick }) {
   const ref = useReveal(idx * 60)
-  const src = it.photo_url ? resolveCoachingPhotoSrc(it.photo_url) : ''
+  const raw = it.photo_url
   return (
     <div
       className="reveal"
       ref={ref}
       style={{background:'var(--white)',border:'1px solid var(--c3)',overflow:'hidden'}}
     >
-      {src && (
+      {raw && (
         <button
           type="button"
-          onClick={() => onPhotoClick({ src, titre: it.titre, texte: it.texte })}
+          onClick={() => onPhotoClick({ src: raw, titre: it.titre, texte: it.texte })}
           style={{
             display:'block', width:'100%', padding:0, margin:0, border:'none', cursor:'zoom-in',
             background:'var(--c1)', lineHeight:0,
           }}
           aria-label={it.titre ? `Agrandir : ${it.titre}` : 'Agrandir la photo'}
         >
-          <img
-            src={src}
+          <CoachingPhotoImg
+            src={raw}
             alt={it.titre || 'Photo'}
             style={{width:'100%',height:'240px',objectFit:'cover',display:'block'}}
-            loading="lazy"
           />
         </button>
       )}
@@ -135,7 +135,7 @@ export default function Galerie() {
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth:'min(96vw, 1200px)', maxHeight:'90vh', textAlign:'center' }}
           >
-            <img
+            <CoachingPhotoImg
               src={lightbox.src}
               alt={lightbox.titre || ''}
               style={{ maxWidth:'100%', maxHeight:'85vh', objectFit:'contain', borderRadius:'4px', boxShadow:'0 24px 80px rgba(0,0,0,.35)' }}

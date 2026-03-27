@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, mergeApprocheData } from '../store'
-import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
+import CoachingPhotoImg from '../components/CoachingPhotoImg'
+import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -341,9 +342,9 @@ export default function Admin() {
         try { await deleteCoachingPhotoByUrl(approche.photo) } catch { /* non bloquant */ }
       }
       const path = `coaching-${Date.now()}-${file.name}`
-      await uploadCoachingPhoto(file, path)
-      // On stocke le PATH (plus fiable) et on résout en URL à l'affichage
-      setApproche(a=>({...a,photo:path}))
+      const up = await uploadCoachingPhoto(file, path)
+      const url = getCoachingPhotoUrl(up.path, up.bucket)
+      setApproche((a) => ({ ...a, photo: url }))
       showToast('Photo uploadée ✓')
     } catch (err) {
       console.error(err)
@@ -519,7 +520,7 @@ export default function Admin() {
                 <Field label="📷 Photo (optionnel)">
                   {g.photo_url && (
                     <div style={{marginBottom:'10px',display:'flex',alignItems:'center',gap:'12px'}}>
-                      <img src={resolveCoachingPhotoSrc(g.photo_url)} alt="" style={{width:'72px',height:'54px',borderRadius:'10px',objectFit:'cover',border:'2px solid var(--c3)'}}/>
+                      <CoachingPhotoImg src={g.photo_url} alt="" style={{width:'72px',height:'54px',borderRadius:'10px',objectFit:'cover',border:'2px solid var(--c3)'}}/>
                       <button
                         onClick={async () => {
                           try { await deleteCoachingPhotoByUrl(g.photo_url) } catch (e) { console.error(e) }
@@ -569,11 +570,11 @@ export default function Admin() {
             <Card title="📷 Photo personnelle">
               {approche.photo && (
                 <div style={{marginBottom:'16px',textAlign:'center'}}>
-                  <img src={resolveCoachingPhotoSrc(approche.photo)} alt="Aperçu" style={{width:'120px',height:'120px',objectFit:'cover',borderRadius:'50%',border:'3px solid var(--c3)'}}/>
+                  <CoachingPhotoImg src={approche.photo} alt="Aperçu" style={{width:'120px',height:'120px',objectFit:'cover',borderRadius:'50%',border:'3px solid var(--c3)'}}/>
                   <button
                     onClick={async () => {
                       try {
-                        if (approche?.photo && typeof approche.photo === 'string' && approche.photo.includes('/object/public/')) {
+                        if (approche?.photo && typeof approche.photo === 'string') {
                           await deleteCoachingPhotoByUrl(approche.photo)
                         }
                       } catch (e) {

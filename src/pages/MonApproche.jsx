@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getData, mergeApprocheData } from '../store'
-import { getSiteContent, resolveCoachingPhotoSrc } from '../supabaseClient'
+import CoachingPhotoImg from '../components/CoachingPhotoImg'
+import { getSiteContent } from '../supabaseClient'
 import { useReveal } from '../hooks/useReveal'
 import './MonApproche.css'
 
@@ -44,7 +45,7 @@ export default function MonApproche() {
           <div className="approche-top">
             {data.photo && (
               <div className="approche-photo-wrap reveal-l" ref={useReveal(0)}>
-                <img src={resolveCoachingPhotoSrc(data.photo)} alt={data.photo_legende || ''} className="approche-photo" />
+                <CoachingPhotoImg src={data.photo} alt={data.photo_legende || ''} className="approche-photo" />
                 {data.photo_legende && <p className="approche-photo-legende">{data.photo_legende}</p>}
               </div>
             )}
