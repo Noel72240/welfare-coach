@@ -4,6 +4,34 @@ import { getData } from '../store'
 import { useReveal } from '../hooks/useReveal'
 import './Tarifs.css'
 
+function TarifCard({ t, index }) {
+  const ref = useReveal(index * 60)
+  return (
+    <div className="tarif-card reveal" ref={ref}>
+      <div className="tarif-header">
+        <span className="tarif-ico">💠</span>
+        <h3>{t.nom}</h3>
+      </div>
+      <p className="tarif-desc">{t.desc}</p>
+      <div className="tarif-prix-row">
+        {t.en_ligne && (
+          <div className="tarif-prix">
+            <span className="prix-label">En ligne</span>
+            <span className="prix-val">{t.en_ligne} €</span>
+          </div>
+        )}
+        {t.domicile && (
+          <div className="tarif-prix tarif-prix-dom">
+            <span className="prix-label">À domicile</span>
+            <span className="prix-val">{t.domicile}{t.domicile === 'Sur devis' ? '' : ' €'}</span>
+          </div>
+        )}
+      </div>
+      <Link to="/contact" className="tarif-btn">Réserver cette prestation →</Link>
+    </div>
+  )
+}
+
 export default function Tarifs() {
   const tarifs = getData('tarifs').filter(t => t.visible)
   const infos = getData('infos')
@@ -24,28 +52,7 @@ export default function Tarifs() {
         <div className="wrap">
           <div className="tarifs-grid">
             {tarifs.map((t, i) => (
-              <div key={t.id} className="tarif-card reveal" ref={useReveal(i * 60)}>
-                <div className="tarif-header">
-                  <span className="tarif-ico">💠</span>
-                  <h3>{t.nom}</h3>
-                </div>
-                <p className="tarif-desc">{t.desc}</p>
-                <div className="tarif-prix-row">
-                  {t.en_ligne && (
-                    <div className="tarif-prix">
-                      <span className="prix-label">En ligne</span>
-                      <span className="prix-val">{t.en_ligne} €</span>
-                    </div>
-                  )}
-                  {t.domicile && (
-                    <div className="tarif-prix tarif-prix-dom">
-                      <span className="prix-label">À domicile</span>
-                      <span className="prix-val">{t.domicile}{t.domicile === 'Sur devis' ? '' : ' €'}</span>
-                    </div>
-                  )}
-                </div>
-                <Link to="/contact" className="tarif-btn">Réserver cette prestation →</Link>
-              </div>
+              <TarifCard key={t.id} t={t} index={i} />
             ))}
           </div>
 

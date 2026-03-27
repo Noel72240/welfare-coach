@@ -6,6 +6,73 @@ import { getSiteContent } from '../supabaseClient'
 import { useReveal } from '../hooks/useReveal'
 import './MonApproche.css'
 
+function ApprochePhotoSlot({ photo, legende }) {
+  const photoRef = useReveal(0)
+  return (
+    <div
+      className="approche-photo-wrap reveal-l"
+      ref={photoRef}
+      style={{ display: photo ? undefined : 'none' }}
+      aria-hidden={!photo}
+    >
+      {photo && (
+        <>
+          <CoachingPhotoImg src={photo} alt={legende || ''} className="approche-photo" />
+          {legende && <p className="approche-photo-legende">{legende}</p>}
+        </>
+      )}
+    </div>
+  )
+}
+
+function ApprocheIntroText({ data, publicName, infos }) {
+  const introRef = useReveal(100)
+  const hasPhoto = Boolean(data.photo)
+  return (
+    <div
+      className={hasPhoto ? 'approche-intro-text reveal-r' : 'approche-intro-text-full reveal'}
+      ref={introRef}
+    >
+      <h2>Qui suis-je ?</h2>
+      <p>
+        Je suis <strong>{publicName}</strong>, {infos.titre} basée à {infos.ville}. Mon parcours m'a conduite à me passionner pour la nutrition et le bien-être, avec une conviction profonde : il est possible de manger sainement tout en prenant du plaisir, sans régime ni privation.
+      </p>
+      <p>
+        Mon approche est centrée sur vous — votre mode de vie, vos goûts, vos contraintes. Pas de solution toute faite, mais un accompagnement sur mesure qui respecte qui vous êtes et vous aide à devenir la meilleure version de vous-même.
+      </p>
+      <div className="approche-contact-box">
+        <a href={`tel:${infos.tel}`} className="approche-contact-item">📞 {infos.tel}</a>
+        <a href={`mailto:${infos.email}`} className="approche-contact-item">✉️ {infos.email}</a>
+      </div>
+    </div>
+  )
+}
+
+function ApprocheSectionBlock({ s, i }) {
+  const blockRef = useReveal(0)
+  return (
+    <section className={`sec ${i % 2 === 1 ? 'sec-alt' : ''}`}>
+      <div className="wrap-sm">
+        <div className={`reveal${i % 2 === 0 ? '-l' : '-r'}`} ref={blockRef}>
+          <div className="eyebrow" style={{ marginBottom: '16px' }}>
+            {i === 0 ? 'Mon approche' : i === 1 ? 'Pour qui ?' : i === 2 ? 'Déroulement' : i === 3 ? 'Les bénéfices' : 'Formation'}
+          </div>
+          <h2 style={{ marginBottom: '28px' }}>{s.titre || 'Section'}</h2>
+          <div className="approche-texte">
+            {(String(s.texte || '')).split('\n').map((line, j) => {
+              if (!line.trim()) return null
+              if (line.startsWith('•') || line.match(/^\d+\./)) {
+                return <div key={j} className="approche-list-item">{line}</div>
+              }
+              return <p key={j}>{line}</p>
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function MonApproche() {
   const [data, setData] = useState(() => mergeApprocheData(getData('approche')))
   const infos = getData('infos')
@@ -43,45 +110,14 @@ export default function MonApproche() {
       <section className="sec">
         <div className="wrap">
           <div className="approche-top">
-            {data.photo && (
-              <div className="approche-photo-wrap reveal-l" ref={useReveal(0)}>
-                <CoachingPhotoImg src={data.photo} alt={data.photo_legende || ''} className="approche-photo" />
-                {data.photo_legende && <p className="approche-photo-legende">{data.photo_legende}</p>}
-              </div>
-            )}
-            <div className={data.photo ? 'approche-intro-text reveal-r' : 'approche-intro-text-full reveal'} ref={useReveal(100)}>
-              <h2>Qui suis-je ?</h2>
-              <p>Je suis <strong>{publicName}</strong>, {infos.titre} basée à {infos.ville}. Mon parcours m'a conduite à me passionner pour la nutrition et le bien-être, avec une conviction profonde : il est possible de manger sainement tout en prenant du plaisir, sans régime ni privation.</p>
-              <p>Mon approche est centrée sur vous — votre mode de vie, vos goûts, vos contraintes. Pas de solution toute faite, mais un accompagnement sur mesure qui respecte qui vous êtes et vous aide à devenir la meilleure version de vous-même.</p>
-              <div className="approche-contact-box">
-                <a href={`tel:${infos.tel}`} className="approche-contact-item">📞 {infos.tel}</a>
-                <a href={`mailto:${infos.email}`} className="approche-contact-item">✉️ {infos.email}</a>
-              </div>
-            </div>
+            <ApprochePhotoSlot photo={data.photo} legende={data.photo_legende} />
+            <ApprocheIntroText data={data} publicName={publicName} infos={infos} />
           </div>
         </div>
       </section>
 
       {sections.map((s, i) => (
-        <section key={s.id || i} className={`sec ${i % 2 === 1 ? 'sec-alt' : ''}`}>
-          <div className="wrap-sm">
-            <div className={`reveal${i % 2 === 0 ? '-l' : '-r'}`} ref={useReveal(0)}>
-              <div className="eyebrow" style={{marginBottom:'16px'}}>
-                {i === 0 ? 'Mon approche' : i === 1 ? 'Pour qui ?' : i === 2 ? 'Déroulement' : i === 3 ? 'Les bénéfices' : 'Formation'}
-              </div>
-              <h2 style={{marginBottom:'28px'}}>{s.titre || 'Section'}</h2>
-              <div className="approche-texte">
-                {(String(s.texte || '')).split('\n').map((line, j) => {
-                  if (!line.trim()) return null
-                  if (line.startsWith('•') || line.match(/^\d+\./)) {
-                    return <div key={j} className="approche-list-item">{line}</div>
-                  }
-                  return <p key={j}>{line}</p>
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
+        <ApprocheSectionBlock key={s.id || i} s={s} i={i} />
       ))}
 
       <section className="sec sec-alt" style={{textAlign:'center'}}>

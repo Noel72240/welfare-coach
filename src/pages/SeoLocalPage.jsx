@@ -96,11 +96,18 @@ const PAGES = {
   },
 }
 
-export default function SeoLocalPage({ pageKey }) {
-  const page = PAGES[pageKey]
-  const infos = getData('infos')
-  if (!page) return null
+function SeoSectionRow({ s, i }) {
+  const ref = useReveal(i * 80)
+  return (
+    <div className="reveal" ref={ref} style={{ marginBottom: '34px' }}>
+      <h2 style={{ marginBottom: '12px' }}>{s.h2}</h2>
+      <p style={{ fontSize: '16px', color: 'var(--text2)', lineHeight: 1.9, fontWeight: 300 }}>{s.text}</p>
+    </div>
+  )
+}
 
+/** Hooks ici uniquement quand `page` est valide (évite return null avant hooks). */
+function SeoLocalPageBody({ page, infos }) {
   return (
     <>
       <div className="page-header">
@@ -116,10 +123,7 @@ export default function SeoLocalPage({ pageKey }) {
       <section className="sec">
         <div className="wrap-sm">
           {page.sections.map((s, i) => (
-            <div key={s.h2} className="reveal" ref={useReveal(i * 80)} style={{marginBottom:'34px'}}>
-              <h2 style={{marginBottom:'12px'}}>{s.h2}</h2>
-              <p style={{fontSize:'16px',color:'var(--text2)',lineHeight:1.9,fontWeight:300}}>{s.text}</p>
-            </div>
+            <SeoSectionRow key={s.h2} s={s} i={i} />
           ))}
 
           <div className="reveal" ref={useReveal(260)} style={{padding:'24px',border:'1px solid var(--c3)',background:'var(--c1)',marginTop:'8px'}}>
@@ -139,5 +143,12 @@ export default function SeoLocalPage({ pageKey }) {
       </section>
     </>
   )
+}
+
+export default function SeoLocalPage({ pageKey }) {
+  const page = PAGES[pageKey]
+  const infos = getData('infos')
+  if (!page) return null
+  return <SeoLocalPageBody page={page} infos={infos} />
 }
 
