@@ -26,7 +26,7 @@ function Particles() {
 }
 
 function StatCell({ count, suffix, label }) {
-  const numRef = useCountUp(count, suffix)
+  const numRef = typeof count === 'number' ? useCountUp(count, suffix) : null
   const tiltRef = useTilt()
   return (
     <div className="stat-cell" ref={tiltRef}>
