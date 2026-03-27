@@ -170,21 +170,25 @@ export const cleanupOrphanAvisPhotos = async (keptPublicUrls) => {
 }
 
 // ---- COACHING / APPROCHE PHOTOS ----
-// Mettre d'abord le bucket réellement utilisé en prod pour générer les URLs publiques
-const DEFAULT_COACHING_BUCKETS = ['coching - photos', 'coaching-photos']
+// Inclut « coaching - photos » et « coching - photos » : noms distincts côté Supabase.
+const DEFAULT_COACHING_BUCKETS = ['coching - photos', 'coaching - photos', 'coaching-photos']
 export const COACHING_BUCKETS = parseCsv(import.meta.env.VITE_COACHING_BUCKETS)
   .concat(DEFAULT_COACHING_BUCKETS)
   .filter((v, i, arr) => arr.indexOf(v) === i)
 
 const COACHING_BUCKET = COACHING_BUCKETS[0]
 
-const extractCoachingBucketPathFromPublicUrl = (url) => {
+const parseCoachingStoragePublicUrl = (url) => {
   if (!url || typeof url !== 'string') return null
-  const marker = `/object/public/${encodeURIComponent(COACHING_BUCKET)}/`
-  const idx = url.indexOf(marker)
-  if (idx === -1) return null
-  const raw = url.slice(idx + marker.length)
-  return raw.split('?')[0] || null
+  for (const bucket of COACHING_BUCKETS) {
+    const marker = `/object/public/${encodeURIComponent(bucket)}/`
+    const idx = url.indexOf(marker)
+    if (idx !== -1) {
+      const path = url.slice(idx + marker.length).split('?')[0] || null
+      if (path) return { bucket, path }
+    }
+  }
+  return null
 }
 
 export const uploadCoachingPhoto = async (file, path) => {
@@ -212,11 +216,11 @@ export const resolveCoachingPhotoSrc = (photoUrlOrPath) => {
 }
 
 export const deleteCoachingPhotoByUrl = async (publicUrl) => {
-  const path = extractCoachingBucketPathFromPublicUrl(publicUrl)
-  if (!path) return { skipped: true, reason: 'unparseable_url' }
-  const { data, error } = await supabase.storage.from(COACHING_BUCKET).remove([path])
+  const parsed = parseCoachingStoragePublicUrl(publicUrl)
+  if (!parsed) return { skipped: true, reason: 'unparseable_url' }
+  const { data, error } = await supabase.storage.from(parsed.bucket).remove([parsed.path])
   if (error) throw error
-  return { skipped: false, data, path }
+  return { skipped: false, data, path: parsed.path, bucket: parsed.bucket }
 }
 
 // ---- GALERIE (DB) ----

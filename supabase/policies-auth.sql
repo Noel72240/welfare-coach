@@ -1,10 +1,8 @@
--- Exécuter dans Supabase → SQL Editor (une fois), après connexion par email (Supabase Auth).
--- Avant, les policies ciblaient souvent le rôle `anon` : les requêtes avec session utilisateur
--- passent en `authenticated` → INSERT / Storage upload échouent sans ces règles.
+-- Version courte (admin + storage authenticated uniquement).
+-- Pour la config complète (anon lecture avis/galerie + storage lecture publique), voir :
+--   supabase/policies-complete.sql
 --
--- Vérifie les noms exacts de tes buckets : Storage → ou requête :
---   select id from storage.buckets;
--- Adapte la liste ci-dessous si tes buckets ont d’autres noms.
+-- Vérifie les noms exacts de tes buckets : SELECT id FROM storage.buckets;
 
 -- ── Tables : droits complets pour utilisateurs connectés (admin) ─────────────
 
@@ -37,6 +35,7 @@ CREATE POLICY "authenticated_storage_site_buckets"
       'avis-photos',
       'avis - photos',
       'coaching-photos',
+      'coaching - photos',
       'coching - photos',
       'galerie'
     )
@@ -46,6 +45,7 @@ CREATE POLICY "authenticated_storage_site_buckets"
       'avis-photos',
       'avis - photos',
       'coaching-photos',
+      'coaching - photos',
       'coching - photos',
       'galerie'
     )
