@@ -95,6 +95,22 @@ h3 em{font-style:italic;color:var(--warm)}
 .cbtn-a:hover{background:var(--warm2)}
 .cbtn-r{background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.15)}
 .cbtn-r:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.8)}
+.cookie-settings-btn{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:790;
+  background:var(--warm);
+  color:#fff;
+  border:1px solid var(--warm);
+  padding:8px 12px;
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.cookie-settings-btn:hover{background:var(--warm2)}
 
 @media(max-width:960px){.sec{padding:72px 5%}.stats-row{grid-template-columns:1fr 1fr}.page-header{padding:110px 5% 50px}}
 @media(max-width:580px){.stats-row{grid-template-columns:1fr}}

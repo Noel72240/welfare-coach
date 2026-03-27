@@ -70,18 +70,57 @@ export function Footer() {
 
 // CookieBanner.jsx
 export function CookieBanner() {
-  const [hidden, setHidden] = React.useState(false)
-  React.useEffect(() => { if (localStorage.getItem('wc_cookies')) setHidden(true) }, [])
-  const accept = () => { localStorage.setItem('wc_cookies', '1'); setHidden(true) }
-  const reject = () => { localStorage.setItem('wc_cookies', '0'); setHidden(true) }
+  const [hidden, setHidden] = React.useState(true)
+  const [choice, setChoice] = React.useState(null)
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('wc_cookies')
+    setChoice(saved)
+    setHidden(Boolean(saved))
+  }, [])
+
+  const accept = () => {
+    localStorage.setItem('wc_cookies', '1')
+    setChoice('1')
+    setHidden(true)
+  }
+
+  const reject = () => {
+    localStorage.setItem('wc_cookies', '0')
+    setChoice('0')
+    setHidden(true)
+  }
+
+  const openSettings = () => setHidden(false)
+
+  const choiceLabel =
+    choice === '1' ? 'Cookies: acceptés' :
+    choice === '0' ? 'Cookies: refusés' :
+    'Cookies'
+
   return (
-    <div className={`cookie-banner ${hidden ? 'hidden' : ''}`} role="dialog" aria-label="Cookies">
-      <p>Ce site utilise des cookies fonctionnels. <Link to="/politique-confidentialite">En savoir plus</Link>.</p>
-      <div className="cookie-btns">
-        <button className="cbtn cbtn-a" onClick={accept}>Accepter</button>
-        <button className="cbtn cbtn-r" onClick={reject}>Refuser</button>
+    <>
+      <div className={`cookie-banner ${hidden ? 'hidden' : ''}`} role="dialog" aria-label="Cookies">
+        <p>
+          Ce site utilise uniquement des cookies fonctionnels. Vous pouvez accepter ou refuser,
+          puis modifier votre choix à tout moment via le bouton "Cookies".{' '}
+          <Link to="/politique-confidentialite">En savoir plus</Link>.
+        </p>
+        <div className="cookie-btns">
+          <button className="cbtn cbtn-a" onClick={accept}>Accepter</button>
+          <button className="cbtn cbtn-r" onClick={reject}>Refuser</button>
+        </div>
       </div>
-    </div>
+
+      <button
+        className="cookie-settings-btn"
+        onClick={openSettings}
+        aria-label="Modifier mes préférences cookies"
+        type="button"
+      >
+        {choiceLabel}
+      </button>
+    </>
   )
 }
 
