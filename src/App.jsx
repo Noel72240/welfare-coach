@@ -12,6 +12,7 @@ import Admin from './pages/Admin'
 import MentionsLegales from './pages/MentionsLegales'
 import Confidentialite from './pages/Confidentialite'
 import SeoLocalPage from './pages/SeoLocalPage'
+import CoachNutritionSarthe from './pages/CoachNutritionSarthe'
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -30,6 +31,7 @@ export default function App() {
       <main id="main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/coach-nutrition-sarthe" element={<CoachNutritionSarthe />} />
           <Route path="/coaching-nutrition-lombron" element={<SeoLocalPage pageKey="coaching-nutrition-lombron" />} />
           <Route path="/coach-bien-etre-sarthe" element={<SeoLocalPage pageKey="coach-bien-etre-sarthe" />} />
           <Route path="/reequilibrage-alimentaire" element={<SeoLocalPage pageKey="reequilibrage-alimentaire" />} />

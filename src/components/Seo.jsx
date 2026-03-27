@@ -6,9 +6,14 @@ const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.welfare-coach.fr
 
 const routeMeta = {
   '/': {
-    title: 'Coach nutrition Sarthe | Welfare Coach à Lombron',
+    title: 'Coach en nutrition à Lombron – Welfare Coach',
     description:
-      "Coach nutrition Sarthe : accompagnement personnalisé à Lombron, Le Mans, Connerré et Bonnétable pour perte de poids durable et rééquilibrage alimentaire.",
+      "Welfare Coach à Lombron : coach nutrition Sarthe pour perte de poids durable, rééquilibrage alimentaire et bien-être à Le Mans, Connerré et Bonnétable.",
+  },
+  '/coach-nutrition-sarthe': {
+    title: 'Coach nutrition Sarthe | Perte de poids & rééquilibrage alimentaire',
+    description:
+      "Coach nutrition Sarthe : accompagnement personnalisé à Lombron, Le Mans, Connerré, Bonnétable pour perte de poids et rééquilibrage alimentaire durable.",
   },
   '/coaching-nutrition-lombron': {
     title: 'Coaching nutrition Lombron (Sarthe) | Welfare Coach',

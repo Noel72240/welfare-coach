@@ -61,7 +61,7 @@ export default function Home() {
         </div>
 
         <h1 className="hero-hl reveal" ref={useReveal(100)}>
-          Et si tout <em>changeait</em><br />en <span className="out">30 minutes</span> ?
+          Coach en nutrition à <em>Lombron</em><br />— <span className="out">Welfare Coach</span>
         </h1>
         <p className="hero-sub1 reveal" ref={useReveal(220)}>
           Ce que vous portez depuis des années peut se transformer bien plus vite que vous ne le croyez.
@@ -151,6 +151,37 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SEO LOCAL BLOCK */}
+      <section className="sec sec-alt">
+        <div className="wrap-sm">
+          <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Coaching nutrition en Sarthe</div></div>
+          <p className="reveal" ref={useReveal(70)} style={{fontSize:'17px',color:'var(--text2)',lineHeight:1.9,fontWeight:300,marginBottom:'18px'}}>
+            Welfare Coach est spécialisé dans le coaching en nutrition et bien-être à Lombron, en Sarthe.
+          </p>
+          <p className="reveal" ref={useReveal(130)} style={{fontSize:'17px',color:'var(--text2)',lineHeight:1.9,fontWeight:300,marginBottom:'18px'}}>
+            Nous accompagnons nos clients à Lombron, Le Mans, Connerré, Bonnétable et Savigné-l'Évêque pour des objectifs de perte de poids, de rééquilibrage alimentaire et d'amélioration du bien-être.
+          </p>
+          <p className="reveal" ref={useReveal(190)} style={{fontSize:'17px',color:'var(--text2)',lineHeight:1.9,fontWeight:300}}>
+            Chaque accompagnement est personnalisé, adapté à votre mode de vie, pour des résultats durables.
+          </p>
+          <div className="reveal" ref={useReveal(250)} style={{display:'flex',gap:'12px',flexWrap:'wrap',marginTop:'24px'}}>
+            <Link to="/coach-nutrition-sarthe" className="btn btn-solid"><span>Coach nutrition Sarthe</span></Link>
+            <Link to="/contact" className="btn btn-outline"><span>Prendre rendez-vous</span></Link>
+            <Link to="/avis" className="btn btn-outline"><span>Voir les avis clients</span></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ZONE D'INTERVENTION */}
+      <section className="sec">
+        <div className="wrap-sm">
+          <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Zone d’intervention</div></div>
+          <p className="reveal" ref={useReveal(80)} style={{fontSize:'18px',color:'var(--text2)',lineHeight:1.9,fontWeight:300}}>
+            Lombron, Le Mans, Connerré, Bonnétable, Savigné-l'Évêque et toute la Sarthe
+          </p>
         </div>
       </section>
 
