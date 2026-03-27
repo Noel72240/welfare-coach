@@ -52,8 +52,29 @@ export default class ErrorBoundary extends React.Component {
             <li>Ouvrez la page en <strong>navigation privée</strong> pour tester.</li>
           </ol>
           <p style={{ fontSize: '13px', color: '#9A8A78' }}>
-            Si le problème continue, vérifiez la console (F12 → Console) pour le détail technique.
+            Si la navigation privée affiche le site correctement, le souci vient en général du cache de ce
+            navigateur — videz-le pour ce domaine.
           </p>
+          {this.state.error?.message && (
+            <details style={{ marginTop: '20px', fontSize: '13px', color: '#524739' }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 500 }}>Détail technique (support)</summary>
+              <pre
+                style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: '#F5EFE4',
+                  border: '1px solid #DDD0BB',
+                  overflow: 'auto',
+                  maxHeight: '160px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '12px',
+                }}
+              >
+                {String(this.state.error.message)}
+              </pre>
+            </details>
+          )}
           <button
             type="button"
             onClick={() => window.location.reload()}
