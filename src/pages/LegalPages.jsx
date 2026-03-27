@@ -4,18 +4,26 @@ import { getData } from '../store'
 import { useReveal } from '../hooks/useReveal'
 
 export function MentionsLegales() {
-  const infos = getData('infos')
-  const legalName = infos.nom_legal || infos.nom
   return (
     <div style={{maxWidth:'820px',margin:'0 auto',padding:'140px 6% 100px'}}>
       <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Informations légales</div></div>
       <h1 className="reveal" ref={useReveal(80)}>Mentions <em>légales</em></h1>
       <span style={{fontSize:'12px',color:'var(--text3)',marginBottom:'56px',letterSpacing:'.06em',display:'block',marginTop:'12px'}}>Dernière mise à jour : 2025</span>
+
+      <div className="reveal" ref={useReveal(100)} style={{marginBottom:'28px',display:'flex',justifyContent:'center'}}>
+        <img
+          src="/allotech72-logo.png"
+          alt="Logo Allotech72"
+          style={{maxWidth:'220px',width:'100%',height:'auto',borderRadius:'12px',border:'1px solid var(--c3)'}}
+          onError={(e) => { e.currentTarget.style.display = 'none' }}
+        />
+      </div>
+
       <div style={{display:'flex',flexDirection:'column',gap:'0'}}>
         {[
-          ['1. Éditeur du site', `${legalName} — ${infos.titre}\nSIRET : ${infos.siret}\n${infos.ville}\nTél : ${infos.tel}\nEmail : ${infos.email}`],
-          ['2. Directeur de la publication', `${legalName}`],
-          ['3. Hébergement', 'Netlify, Inc. — 44 Montgomery Street, Suite 300, San Francisco, CA 94104, USA'],
+          ['1. Éditeur du site', `Allotech72\nSIRET : 99006097200017\nLombron, Sarthe\nTél : 06 13 89 39 67\nEmail : contact@allotech72.fr`],
+          ['2. Directeur de la publication', `Allotech72`],
+          ['3. Hébergement', 'Vercel Inc. — 340 S Lemon Ave #4133, Walnut, CA 91789, USA'],
           ['4. Propriété intellectuelle', "L'ensemble des contenus (textes, images, logotype) est la propriété exclusive de Welfare Coach. Toute reproduction sans autorisation écrite est interdite."],
           ['5. Responsabilité', "Welfare Coach s'efforce de maintenir des informations exactes. Sa responsabilité ne saurait être engagée en cas d'omission ou d'inexactitude."],
           ['6. Droit applicable', "Site soumis au droit français. Tout litige relève de la compétence des tribunaux français."],
