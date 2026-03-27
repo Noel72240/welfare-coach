@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/logo.png'
-import { getData } from '../store'
+import { getData, DEFAULTS } from '../store'
 import { getAvis } from '../supabaseClient'
 import { useReveal, useCountUp, useTilt } from '../hooks/useReveal'
 import './Home.css'
@@ -40,7 +40,11 @@ function StatCell({ count, suffix, label }) {
 export default function Home() {
   const infos = getData('infos')
   const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
-  const [avis, setAvis] = useState(getData('avis').filter(a => a.visible).slice(0, 3))
+  const [avis, setAvis] = useState(() => {
+    const v = getData('avis')
+    const list = Array.isArray(v) ? v : DEFAULTS.avis
+    return list.filter((a) => a.visible).slice(0, 3)
+  })
 
   useEffect(() => {
     let alive = true

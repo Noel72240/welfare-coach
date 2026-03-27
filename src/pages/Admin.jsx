@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
+import { supabase, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, getAvis, getGalerie } from '../supabaseClient'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -128,8 +128,35 @@ export default function Admin() {
   const [approche, setApproche] = useState(getData('approche'))
   const [contact, setContact] = useState(getData('contact'))
   const [mdpOld,setMdpOld]=useState(''); const [mdpNew,setMdpNew]=useState(''); const [mdpCf,setMdpCf]=useState(''); const [mdpMsg,setMdpMsg]=useState(null)
+  const [syncingRemote, setSyncingRemote] = useState(false)
 
   const showToast = (msg) => { setToast(msg); setToastShow(true); setTimeout(()=>setToastShow(false), 3000) }
+
+  // À la connexion : charger avis + galerie depuis Supabase (même liste sur tous les PC)
+  useEffect(() => {
+    if (auth !== true) return
+    let cancelled = false
+    setSyncingRemote(true)
+    ;(async () => {
+      try {
+        const [r1, r2] = await Promise.allSettled([getAvis(), getGalerie()])
+        if (cancelled) return
+        if (r1.status === 'fulfilled' && Array.isArray(r1.value)) {
+          setAvis(r1.value)
+          setData('avis', r1.value)
+        } else if (r1.status === 'rejected') console.warn('Admin: avis Supabase', r1.reason)
+        if (r2.status === 'fulfilled' && Array.isArray(r2.value)) {
+          setGalerie(r2.value)
+          setData('galerie', r2.value)
+        } else if (r2.status === 'rejected') console.warn('Admin: galerie Supabase', r2.reason)
+      } catch (e) {
+        console.warn('Admin: chargement distant', e)
+      } finally {
+        if (!cancelled) setSyncingRemote(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [auth])
 
   useEffect(() => {
     let cancelled = false
@@ -361,6 +388,7 @@ export default function Admin() {
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
           <span style={{background:'var(--warm-pale)',border:'1px solid rgba(158,115,72,.2)',color:'var(--warm)',padding:'5px 14px',fontSize:'11px',letterSpacing:'.1em',textTransform:'uppercase'}}>Administration</span>
+          {syncingRemote && <span style={{fontSize:'12px',color:'var(--text3)'}}>Synchronisation Supabase…</span>}
           <button className="btn-sg" onClick={saveAll}>💾 Tout sauvegarder</button>
           <button className="btn-lo" onClick={doLogout}>Déconnexion</button>
         </div>

@@ -89,11 +89,21 @@ export const DEFAULTS = {
 
 // ── Fonctions get/set ──
 export function getData(key) {
+  const def = DEFAULTS[key]
   try {
     const raw = localStorage.getItem('wc_' + key)
-    return raw ? JSON.parse(raw) : DEFAULTS[key]
+    if (raw == null || raw === '') return def
+    const parsed = JSON.parse(raw)
+    // JSON "null" ou types incorrects → évite les crash (.filter sur null, etc.)
+    if (parsed == null) return def
+    if (Array.isArray(def)) return Array.isArray(parsed) ? parsed : def
+    if (def !== null && typeof def === 'object' && !Array.isArray(def)) {
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return def
+      return parsed
+    }
+    return parsed
   } catch {
-    return DEFAULTS[key]
+    return def
   }
 }
 
