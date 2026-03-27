@@ -48,6 +48,43 @@ function StatCellText({ text, label }) {
   )
 }
 
+function HomeAvisCard({ a, index }) {
+  const cardRef = useReveal(index * 80)
+  return (
+    <div className="avis-card reveal" ref={cardRef}>
+      <div className="avis-stars">{'★'.repeat(a.note)}</div>
+      <p className="avis-texte">"{a.texte}"</p>
+      <div className="avis-author">— {a.nom}, {a.ville}</div>
+    </div>
+  )
+}
+
+/** Section isolée : hooks stables même quand la liste d’avis passe de 0 à N (évite React #300). */
+function HomeAvisSection({ avis }) {
+  const eyebrowRef = useReveal(0)
+  const titleRef = useReveal(80)
+  if (avis.length === 0) return null
+  return (
+    <section className="sec">
+      <div className="wrap">
+        <div className="reveal" ref={eyebrowRef}><div className="eyebrow">Témoignages</div></div>
+        <h2 className="reveal" ref={titleRef}>Ce que disent mes <em>clients</em></h2>
+        <div className="avis-grid">
+          {avis.map((a, i) => (
+            <HomeAvisCard key={a.id} a={a} index={i} />
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <Link to="/avis" className="btn btn-outline">
+            <span>Voir tous les avis</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
   const infos = getData('infos')
   const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
@@ -252,29 +289,7 @@ export default function Home() {
       </section>
 
       {/* AVIS */}
-      {avis.length > 0 && (
-        <section className="sec">
-          <div className="wrap">
-            <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Témoignages</div></div>
-            <h2 className="reveal" ref={useReveal(80)}>Ce que disent mes <em>clients</em></h2>
-            <div className="avis-grid">
-              {avis.map((a, i) => (
-                <div key={a.id} className="avis-card reveal" ref={useReveal(i*80)}>
-                  <div className="avis-stars">{'★'.repeat(a.note)}</div>
-                  <p className="avis-texte">"{a.texte}"</p>
-                  <div className="avis-author">— {a.nom}, {a.ville}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{textAlign:'center',marginTop:'40px'}}>
-              <Link to="/avis" className="btn btn-outline">
-                <span>Voir tous les avis</span>
-                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+      <HomeAvisSection avis={avis} />
 
       {/* CTA FINAL */}
       <section className="sec sec-alt" style={{textAlign:'center'}}>
