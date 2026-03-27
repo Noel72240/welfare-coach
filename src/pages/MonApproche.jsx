@@ -7,6 +7,7 @@ import './MonApproche.css'
 export default function MonApproche() {
   const data = getData('approche')
   const infos = getData('infos')
+  const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
 
   return (
     <>
@@ -33,7 +34,7 @@ export default function MonApproche() {
             )}
             <div className={data.photo ? 'approche-intro-text reveal-r' : 'approche-intro-text-full reveal'} ref={useReveal(100)}>
               <h2>Qui suis-je ?</h2>
-              <p>Je suis <strong>{infos.nom}</strong>, {infos.titre} basée à {infos.ville}. Mon parcours m'a conduite à me passionner pour la nutrition et le bien-être, avec une conviction profonde : il est possible de manger sainement tout en prenant du plaisir, sans régime ni privation.</p>
+              <p>Je suis <strong>{publicName}</strong>, {infos.titre} basée à {infos.ville}. Mon parcours m'a conduite à me passionner pour la nutrition et le bien-être, avec une conviction profonde : il est possible de manger sainement tout en prenant du plaisir, sans régime ni privation.</p>
               <p>Mon approche est centrée sur vous — votre mode de vie, vos goûts, vos contraintes. Pas de solution toute faite, mais un accompagnement sur mesure qui respecte qui vous êtes et vous aide à devenir la meilleure version de vous-même.</p>
               <div className="approche-contact-box">
                 <a href={`tel:${infos.tel}`} className="approche-contact-item">📞 {infos.tel}</a>

@@ -7,6 +7,7 @@ import './Footer.css'
 
 export function Footer() {
   const infos = getData('infos')
+  const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
   return (
     <footer>
       <div className="ft-inner">
@@ -56,7 +57,7 @@ export function Footer() {
           </div>
         </div>
         <div className="ft-bot">
-          <p>© 2025 Welfare Coach — {infos.nom} — Tous droits réservés</p>
+          <p>© 2025 Welfare Coach — {publicName} — Tous droits réservés</p>
           <div className="ft-bot-links">
             <Link to="/mentions-legales">Mentions légales</Link>
             <Link to="/politique-confidentialite">Confidentialité</Link>

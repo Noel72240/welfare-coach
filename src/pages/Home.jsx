@@ -38,6 +38,7 @@ function StatCell({ count, suffix, label }) {
 
 export default function Home() {
   const infos = getData('infos')
+  const publicName = (infos.nom || '').trim().split(/\s+/)[0] || infos.nom
   const avis = getData('avis').filter(a => a.visible).slice(0, 3)
 
   return (
@@ -112,7 +113,7 @@ export default function Home() {
           <div className="intro-grid">
             <div className="reveal-l" ref={useReveal(0)}>
               <div className="eyebrow">Bienvenue</div>
-              <h2>Je suis <em>{infos.nom}</em>,<br />{infos.titre}</h2>
+              <h2>Je suis <em>{publicName}</em>,<br />{infos.titre}</h2>
               <p style={{fontSize:'17px',color:'var(--text2)',lineHeight:'1.9',marginTop:'20px',marginBottom:'24px',fontWeight:300}}>
                 J'accompagne les personnes qui souhaitent retrouver un équilibre alimentaire, améliorer leur santé et atteindre leurs objectifs de bien-être grâce à une alimentation adaptée et durable.
               </p>
