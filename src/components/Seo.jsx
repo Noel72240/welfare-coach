@@ -2,7 +2,19 @@ import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.welfare-coach.fr').replace(/\/+$/, '')
+const normalizeSiteUrl = (rawUrl) => {
+  const fallback = 'https://www.welfare-coach.fr'
+  try {
+    const url = new URL(rawUrl || fallback)
+    if (url.hostname === 'welfare-coach.fr') url.hostname = 'www.welfare-coach.fr'
+    if (!url.hostname.startsWith('www.')) url.hostname = `www.${url.hostname}`
+    return url.origin
+  } catch {
+    return fallback
+  }
+}
+
+const SITE_URL = normalizeSiteUrl(import.meta.env.VITE_SITE_URL)
 
 const routeMeta = {
   '/': {
@@ -84,7 +96,7 @@ export default function Seo() {
   }
   const normalizedPath = legacyMap[pathname] || pathname
   const meta = routeMeta[normalizedPath] || routeMeta['/']
-  const canonical = `${SITE_URL}${pathname === '/' ? '' : pathname}`
+  const canonical = `${SITE_URL}${normalizedPath === '/' ? '' : normalizedPath}`
 
   const jsonLd = {
     '@context': 'https://schema.org',
