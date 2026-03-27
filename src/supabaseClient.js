@@ -202,3 +202,27 @@ export const deleteCoachingPhotoByUrl = async (publicUrl) => {
   if (error) throw error
   return { skipped: false, data, path }
 }
+
+// ---- GALERIE (DB) ----
+export const getGalerie = async () => {
+  const { data, error } = await supabase
+    .from('galerie')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export const upsertGalerie = async (items) => {
+  const rows = (items || []).map(({ id, ...rest }) => ({
+    id,
+    ...rest,
+  }))
+  const { error } = await supabase.from('galerie').upsert(rows, { onConflict: 'id' })
+  if (error) throw error
+}
+
+export const deleteGalerieRow = async (id) => {
+  const { error } = await supabase.from('galerie').delete().eq('id', id)
+  if (error) throw error
+}

@@ -1,9 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { getData } from '../store'
 import { useReveal } from '../hooks/useReveal'
+import { getGalerie, resolveCoachingPhotoSrc } from '../supabaseClient'
 
 export default function Galerie() {
-  const items = (getData('galerie') || []).filter(i => i?.visible !== false)
+  const [items, setItems] = useState([])
+
+  useEffect(() => {
+    let alive = true
+    const load = async () => {
+      try {
+        const supa = await getGalerie()
+        if (alive) {
+          if (!supa || supa.length === 0) setItems((getData('galerie') || []).filter(i => i?.visible !== false))
+          else setItems(supa.filter(i => i?.visible !== false))
+        }
+      } catch {
+        if (alive) setItems((getData('galerie') || []).filter(i => i?.visible !== false))
+      }
+    }
+    load()
+    return () => { alive = false }
+  }, [])
 
   return (
     <>
@@ -33,7 +51,7 @@ export default function Galerie() {
                 >
                   {it.photo_url && (
                     <img
-                      src={it.photo_url}
+                      src={resolveCoachingPhotoSrc(it.photo_url)}
                       alt={it.titre || 'Photo'}
                       style={{width:'100%',height:'240px',objectFit:'cover',display:'block'}}
                       loading="lazy"

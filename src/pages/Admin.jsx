@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, DEFAULTS } from '../store'
-import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc } from '../supabaseClient'
+import { supabase, uploadPhoto, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, resolveCoachingPhotoSrc, upsertGalerie } from '../supabaseClient'
 import './Admin.css'
 
 const PWD_KEY = 'wc_pwd', SES_KEY = 'wc_ses'
@@ -142,6 +142,22 @@ export default function Admin() {
       showToast('Avis sauvegardés dans Supabase ✓')
     } catch (err) {
       console.error('Supabase erreur:', err)
+      const msg =
+        err?.message ||
+        err?.error_description ||
+        (typeof err === 'string' ? err : null) ||
+        'Erreur Supabase (voir console)'
+      showToast(msg)
+    }
+  }
+
+  const saveGalerieSupabase = async () => {
+    try {
+      await upsertGalerie(galerie)
+      setData('galerie', galerie)
+      showToast('Galerie sauvegardée dans Supabase ✓')
+    } catch (err) {
+      console.error('Supabase erreur (galerie):', err)
       const msg =
         err?.message ||
         err?.error_description ||
@@ -348,7 +364,7 @@ export default function Admin() {
 
           {/* ── GALERIE ── */}
           {panel==='galerie' && <>
-            <PanelHeader title="Page <em>Galerie</em>" sub="Ajoutez des photos avec une description" onSave={()=>save('galerie',galerie,'Galerie')} />
+            <PanelHeader title="Page <em>Galerie</em>" sub="Ajoutez des photos avec une description" onSave={saveGalerieSupabase} saveLabel="Enregistrer dans Supabase" />
             {galerie.map((g,i) => (
               <Card key={g.id} title={`Photo ${i+1}`} onDelete={()=>delGal(g.id)}>
                 <Toggle checked={g.visible} onChange={v=>updGal(g.id,'visible',v)} />
@@ -359,7 +375,7 @@ export default function Admin() {
                 <Field label="📷 Photo (optionnel)">
                   {g.photo_url && (
                     <div style={{marginBottom:'10px',display:'flex',alignItems:'center',gap:'12px'}}>
-                      <img src={g.photo_url} alt="" style={{width:'72px',height:'54px',borderRadius:'10px',objectFit:'cover',border:'2px solid var(--c3)'}}/>
+                      <img src={resolveCoachingPhotoSrc(g.photo_url)} alt="" style={{width:'72px',height:'54px',borderRadius:'10px',objectFit:'cover',border:'2px solid var(--c3)'}}/>
                       <button
                         onClick={async () => {
                           try { await deleteCoachingPhotoByUrl(g.photo_url) } catch (e) { console.error(e) }
