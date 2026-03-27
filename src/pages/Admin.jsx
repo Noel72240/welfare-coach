@@ -7,6 +7,15 @@ import './Admin.css'
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
 const ADMIN_EMAIL_ALLOW = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() || ''
 
+function formatSupabaseError(err) {
+  if (!err) return 'Erreur inconnue'
+  const m = err.message || String(err)
+  const d = err.details && String(err.details).trim()
+  const h = err.hint && String(err.hint).trim()
+  const code = err.code ? ` [${err.code}]` : ''
+  return [m, d && `— ${d}`, h && `(${h})`].filter(Boolean).join(' ') + code
+}
+
 // ── Toast ──
 function Toast({ msg, show }) {
   return <div className={`adm-toast ${show ? 'show' : ''}`}>✓ {msg}</div>
@@ -203,12 +212,7 @@ export default function Admin() {
       showToast('Avis sauvegardés dans Supabase ✓')
     } catch (err) {
       console.error('Supabase erreur:', err)
-      const msg =
-        err?.message ||
-        err?.error_description ||
-        (typeof err === 'string' ? err : null) ||
-        'Erreur Supabase (voir console)'
-      showToast(msg)
+      showToast(formatSupabaseError(err))
     }
   }
 
@@ -234,12 +238,7 @@ export default function Admin() {
       showToast('Galerie sauvegardée dans Supabase ✓')
     } catch (err) {
       console.error('Supabase erreur (galerie):', err)
-      const msg =
-        err?.message ||
-        err?.error_description ||
-        (typeof err === 'string' ? err : null) ||
-        'Erreur Supabase (voir console)'
-      showToast(msg)
+      showToast(formatSupabaseError(err))
     }
   }
 
@@ -301,12 +300,7 @@ export default function Admin() {
       showToast('Photo uploadée ✓')
     } catch (err) {
       console.error(err)
-      const msg =
-        err?.message ||
-        err?.error_description ||
-        (typeof err === 'string' ? err : null) ||
-        'Erreur upload photo (voir console)'
-      showToast(msg)
+      showToast(formatSupabaseError(err))
     }
   }
 
@@ -453,7 +447,7 @@ export default function Admin() {
                           showToast('Photo uploadée ✓')
                         } catch(err) {
                           console.error(err)
-                          showToast('Erreur upload photo')
+                          showToast(formatSupabaseError(err))
                         }
                       }}
                     />
@@ -506,7 +500,7 @@ export default function Admin() {
                           showToast('Photo uploadée ✓')
                         } catch(err) {
                           console.error(err)
-                          showToast(err?.message || 'Erreur upload photo')
+                          showToast(formatSupabaseError(err))
                         }
                       }}
                     />
