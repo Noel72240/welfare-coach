@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://welfarecoach-lombron.fr/sitemap.xml
+Sitemap: https://welfare-coach.fr/sitemap.xml
 

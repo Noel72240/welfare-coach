@@ -9,6 +9,7 @@ import MonApproche from './pages/MonApproche'
 import Tarifs from './pages/Tarifs'
 import Contact from './pages/Contact'
 import AvisClients from './pages/AvisClients'
+import Galerie from './pages/Galerie'
 import Admin from './pages/Admin'
 import MentionsLegales from './pages/MentionsLegales'
 import Confidentialite from './pages/Confidentialite'
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/le-coaching" element={<LeCoaching />} />
           <Route path="/mon-approche" element={<MonApproche />} />
           <Route path="/tarifs" element={<Tarifs />} />
+          <Route path="/galerie" element={<Galerie />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/avis-clients" element={<AvisClients />} />
           <Route path="/admin" element={<Admin />} />

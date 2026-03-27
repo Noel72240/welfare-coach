@@ -20,7 +20,7 @@ export default function Navbar() {
   const toggle = () => { const n = !open; setOpen(n); document.body.style.overflow = n ? 'hidden' : '' }
   const isA = (p) => location.pathname === p
 
-  const links = [['/', 'Accueil'],['/le-coaching', 'Le Coaching'],['/mon-approche', 'Mon Approche'],['/tarifs', 'Tarifs'],['/contact', 'Contact'],['/avis-clients', 'Avis Clients']]
+  const links = [['/', 'Accueil'],['/le-coaching', 'Le Coaching'],['/mon-approche', 'Mon Approche'],['/tarifs', 'Tarifs'],['/galerie', 'Galerie'],['/contact', 'Contact'],['/avis-clients', 'Avis Clients']]
 
   return (
     <>

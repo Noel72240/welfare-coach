@@ -106,6 +106,7 @@ export default function Admin() {
   const [infos, setInfos] = useState(getData('infos'))
   const [tarifs, setTarifs] = useState(getData('tarifs'))
   const [avis, setAvis] = useState(getData('avis'))
+  const [galerie, setGalerie] = useState(getData('galerie') || [])
   const [approche, setApproche] = useState(getData('approche'))
   const [contact, setContact] = useState(getData('contact'))
   const [mdpOld,setMdpOld]=useState(''); const [mdpNew,setMdpNew]=useState(''); const [mdpCf,setMdpCf]=useState(''); const [mdpMsg,setMdpMsg]=useState(null)
@@ -152,6 +153,7 @@ export default function Admin() {
 
   const saveAll = () => {
     setData('infos',infos); setData('tarifs',tarifs)
+    setData('galerie',galerie)
     setData('approche',approche); setData('contact',contact)
     saveAvisSupabase()
   }
@@ -177,6 +179,11 @@ export default function Admin() {
   const updSection = (id,k,v) => setApproche(a=>({...a,sections:a.sections.map(s=>s.id===id?{...s,[k]:v}:s)}))
   const addSection = () => setApproche(a=>({...a,sections:[...a.sections,{id:Date.now(),titre:'Nouvelle section',texte:'Contenu de la section.'}]}))
   const delSection = id => { if(window.confirm('Supprimer cette section ?')) setApproche(a=>({...a,sections:a.sections.filter(s=>s.id!==id)})) }
+
+  // ── Galerie helpers ──
+  const updGal = (id,k,v) => setGalerie(gs=>gs.map(g=>g.id===id?{...g,[k]:v}:g))
+  const delGal = id => { if(window.confirm('Supprimer cette photo ?')) setGalerie(gs=>gs.filter(g=>g.id!==id)) }
+  const addGal = () => setGalerie(gs=>[...gs,{id:Date.now(),titre:'Titre',texte:'Description…',photo_url:'',visible:true}])
 
   // ── Photo upload (Mon Approche → Supabase Storage) ──
   const handlePhoto = async (e) => {
@@ -225,6 +232,7 @@ export default function Admin() {
     ['tarifs','💰','Tarifs'],
     ['avis','⭐','Avis clients'],
     ['approche','📝','Mon approche'],
+    ['galerie','🖼️','Galerie'],
     ['contact_page','📍','Page contact'],
     ['infos_gen','⚙️','Infos générales'],
     ['mdp','🔒','Mot de passe'],
@@ -338,6 +346,59 @@ export default function Admin() {
             <button className="btn-add" onClick={addAvis}>+ Ajouter un avis</button>
           </>}
 
+          {/* ── GALERIE ── */}
+          {panel==='galerie' && <>
+            <PanelHeader title="Page <em>Galerie</em>" sub="Ajoutez des photos avec une description" onSave={()=>save('galerie',galerie,'Galerie')} />
+            {galerie.map((g,i) => (
+              <Card key={g.id} title={`Photo ${i+1}`} onDelete={()=>delGal(g.id)}>
+                <Toggle checked={g.visible} onChange={v=>updGal(g.id,'visible',v)} />
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px',marginTop:'16px'}}>
+                  <Field label="Titre"><Input value={g.titre} onChange={v=>updGal(g.id,'titre',v)} placeholder="Avant / Après"/></Field>
+                  <Field label="Description"><Input value={g.texte} onChange={v=>updGal(g.id,'texte',v)} placeholder="Une courte description…"/></Field>
+                </div>
+                <Field label="📷 Photo (optionnel)">
+                  {g.photo_url && (
+                    <div style={{marginBottom:'10px',display:'flex',alignItems:'center',gap:'12px'}}>
+                      <img src={g.photo_url} alt="" style={{width:'72px',height:'54px',borderRadius:'10px',objectFit:'cover',border:'2px solid var(--c3)'}}/>
+                      <button
+                        onClick={async () => {
+                          try { await deleteCoachingPhotoByUrl(g.photo_url) } catch (e) { console.error(e) }
+                          updGal(g.id,'photo_url','')
+                          showToast('Photo supprimée ✓')
+                        }}
+                        style={{background:'none',border:'none',color:'var(--err)',cursor:'pointer',fontSize:'13px'}}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  )}
+                  <div style={{border:'2px dashed var(--c3)',padding:'16px',textAlign:'center',cursor:'pointer',position:'relative',transition:'all .3s'}}
+                    onMouseEnter={e=>e.currentTarget.style.borderColor='var(--warm)'}
+                    onMouseLeave={e=>e.currentTarget.style.borderColor='var(--c3)'}
+                  >
+                    <input type="file" accept="image/*" style={{position:'absolute',inset:0,opacity:0,cursor:'pointer'}}
+                      onChange={async (e) => {
+                        const file = e.target.files[0]; if(!file) return
+                        try {
+                          const path = `galerie-${Date.now()}-${file.name}`
+                          await uploadCoachingPhoto(file, path)
+                          const url = getCoachingPhotoUrl(path)
+                          updGal(g.id,'photo_url',url)
+                          showToast('Photo uploadée ✓')
+                        } catch(err) {
+                          console.error(err)
+                          showToast(err?.message || 'Erreur upload photo')
+                        }
+                      }}
+                    />
+                    <p style={{fontSize:'13px',color:'var(--text3)',margin:0}}>📸 Cliquez pour uploader une photo<br/><span style={{fontSize:'11px',opacity:.7}}>JPG, PNG — max 5MB</span></p>
+                  </div>
+                </Field>
+              </Card>
+            ))}
+            <button className="btn-add" onClick={addGal}>+ Ajouter une photo</button>
+          </>}
+
           {/* ── MON APPROCHE ── */}
           {panel==='approche' && <>
             <PanelHeader title="Page <em>Mon Approche</em>" sub="Modifiez le contenu, la photo et les sections" onSave={()=>save('approche',approche,'Page Mon Approche')} />
@@ -377,7 +438,7 @@ export default function Admin() {
                 <p style={{fontSize:'14px',color:'var(--text3)'}}>📸 Cliquez ou glissez une photo ici<br/><span style={{fontSize:'12px',color:'var(--text3)',opacity:.7}}>JPG, PNG — max 5MB</span></p>
               </div>
               <div style={{marginTop:'14px'}}>
-                <Field label="Légende de la photo"><Input value={approche.photo_legende} onChange={v=>setApproche({...approche,photo_legende:v})} placeholder="Johanna HAYER — Coach Nutrition"/></Field>
+                <Field label="Légende de la photo"><Input value={approche.photo_legende} onChange={v=>setApproche({...approche,photo_legende:v})} placeholder="Johanna — Coach Nutrition"/></Field>
               </div>
             </Card>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',margin:'28px 0 16px'}}>

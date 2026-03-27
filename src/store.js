@@ -6,7 +6,10 @@
 export const DEFAULTS = {
   // ── INFOS GÉNÉRALES ──
   infos: {
-    nom: 'Johanna HAYER',
+    // Nom affiché sur le site (sans nom de famille si souhaité)
+    nom: 'Johanna',
+    // Nom complet uniquement pour les mentions légales
+    nom_legal: 'Johanna HAYER',
     titre: 'Coach en Nutrition & Bien-être',
     ville: 'Lombron, Sarthe',
     tel: '07.83.75.15.33',
@@ -33,12 +36,17 @@ export const DEFAULTS = {
     { id:4, nom:'Aurélie D.', ville:'Sarthe', note:5, texte:"Un suivi personnalisé et motivant. Johanna est à l'écoute, professionnelle et très sympathique. Je continue l'aventure avec elle !", visible:true },
   ],
 
+  // ── GALERIE ──
+  galerie: [
+    // { id: 1, titre: 'Avant / Après', texte: 'Description…', photo_url: '', visible: true }
+  ],
+
   // ── PAGE MON APPROCHE ──
   approche: {
     titre: 'Mon approche du coaching en nutrition',
     intro: "Le coaching en nutrition ne consiste pas à suivre un régime imposé, mais à apprendre à mieux comprendre votre alimentation et à faire les bons choix au quotidien. Mon rôle est de vous guider pas à pas, en tenant compte de votre mode de vie, de vos goûts et de vos contraintes.",
     photo: '', // base64 ou URL
-    photo_legende: 'Johanna HAYER — Coach Nutrition & Bien-être à Lombron',
+    photo_legende: 'Johanna — Coach Nutrition & Bien-être à Lombron',
     sections: [
       {
         id:1,

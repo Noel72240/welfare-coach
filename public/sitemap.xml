@@ -1,42 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://welfarecoach-lombron.fr/</loc>
+    <loc>https://welfare-coach.fr/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/le-coaching</loc>
+    <loc>https://welfare-coach.fr/le-coaching</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/mon-approche</loc>
+    <loc>https://welfare-coach.fr/mon-approche</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/tarifs</loc>
+    <loc>https://welfare-coach.fr/tarifs</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/avis-clients</loc>
+    <loc>https://welfare-coach.fr/galerie</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://welfare-coach.fr/avis-clients</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/contact</loc>
+    <loc>https://welfare-coach.fr/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/mentions-legales</loc>
+    <loc>https://welfare-coach.fr/mentions-legales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://welfarecoach-lombron.fr/politique-confidentialite</loc>
+    <loc>https://welfare-coach.fr/politique-confidentialite</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>

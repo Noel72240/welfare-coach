@@ -5,6 +5,7 @@ import { useReveal } from '../hooks/useReveal'
 
 export function MentionsLegales() {
   const infos = getData('infos')
+  const legalName = infos.nom_legal || infos.nom
   return (
     <div style={{maxWidth:'820px',margin:'0 auto',padding:'140px 6% 100px'}}>
       <div className="reveal" ref={useReveal(0)}><div className="eyebrow">Informations légales</div></div>
@@ -12,8 +13,8 @@ export function MentionsLegales() {
       <span style={{fontSize:'12px',color:'var(--text3)',marginBottom:'56px',letterSpacing:'.06em',display:'block',marginTop:'12px'}}>Dernière mise à jour : 2025</span>
       <div style={{display:'flex',flexDirection:'column',gap:'0'}}>
         {[
-          ['1. Éditeur du site', `${infos.nom} — ${infos.titre}\nSIRET : ${infos.siret}\n${infos.ville}\nTél : ${infos.tel}\nEmail : ${infos.email}`],
-          ['2. Directeur de la publication', `${infos.nom}`],
+          ['1. Éditeur du site', `${legalName} — ${infos.titre}\nSIRET : ${infos.siret}\n${infos.ville}\nTél : ${infos.tel}\nEmail : ${infos.email}`],
+          ['2. Directeur de la publication', `${legalName}`],
           ['3. Hébergement', 'Netlify, Inc. — 44 Montgomery Street, Suite 300, San Francisco, CA 94104, USA'],
           ['4. Propriété intellectuelle', "L'ensemble des contenus (textes, images, logotype) est la propriété exclusive de Welfare Coach. Toute reproduction sans autorisation écrite est interdite."],
           ['5. Responsabilité', "Welfare Coach s'efforce de maintenir des informations exactes. Sa responsabilité ne saurait être engagée en cas d'omission ou d'inexactitude."],

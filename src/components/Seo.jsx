@@ -8,7 +8,7 @@ const routeMeta = {
   '/': {
     title: 'Welfare Coach — Coach Nutrition & Bien-être · Lombron, Sarthe',
     description:
-      "Johanna HAYER, coach en nutrition et bien-être à Lombron (Sarthe). Accompagnement personnalisé pour perdre du poids, retrouver l'énergie et adopter une alimentation durable. Séances en ligne et à domicile.",
+      "Johanna, coach en nutrition et bien-être à Lombron (Sarthe). Accompagnement personnalisé pour perdre du poids, retrouver l'énergie et adopter une alimentation durable. Séances en ligne et à domicile.",
   },
   '/le-coaching': {
     title: "Le coaching — Nutrition & bien-être | Welfare Coach",
@@ -28,12 +28,17 @@ const routeMeta = {
   '/contact': {
     title: 'Contact — Prendre rendez-vous | Welfare Coach',
     description:
-      "Contactez Johanna HAYER pour une première séance découverte. Réponse rapide par email ou téléphone.",
+      "Contactez Johanna pour une première séance découverte. Réponse rapide par email ou téléphone.",
   },
   '/avis-clients': {
     title: 'Avis clients — Témoignages | Welfare Coach',
     description:
       "Des témoignages authentiques de personnes accompagnées en coaching nutrition & bien-être.",
+  },
+  '/galerie': {
+    title: 'Galerie — Photos | Welfare Coach',
+    description:
+      "Galerie photos : l’univers du coaching, l’approche et des moments clés de l’accompagnement.",
   },
   '/mentions-legales': {
     title: 'Mentions légales | Welfare Coach',
