@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { getData } from '../store'
-import { getAvis, resolveAvisPhotoSrc } from '../supabaseClient'
+import { getAvis } from '../supabaseClient'
+import AvisPhotoImg from '../components/AvisPhotoImg'
 
 // Composant carte individuel avec son propre ref (évite les hooks dans les boucles)
 function AvisCard({ a, delay }) {
@@ -34,7 +35,7 @@ function AvisCard({ a, delay }) {
       </p>
       {a.photo_url && (
         <div style={{marginBottom:'16px',textAlign:'center'}}>
-          <img src={resolveAvisPhotoSrc(a.photo_url)} alt={a.nom} style={{width:'64px',height:'64px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}} />
+          <AvisPhotoImg src={a.photo_url} alt={a.nom} style={{width:'64px',height:'64px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}} />
         </div>
       )}
       <div style={{display:'flex',alignItems:'center',gap:'12px',paddingTop:'16px',borderTop:'1px solid var(--c3)'}}>

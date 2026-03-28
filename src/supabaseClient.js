@@ -99,6 +99,13 @@ export const getPhotoUrl = (path) => {
   return data.publicUrl
 }
 
+/** URL publique pour un bucket précis (multi-bucket avis, comme la galerie). */
+export const getAvisPhotoUrl = (path, bucket = AVIS_BUCKETS[0]) => {
+  if (!supabase || !path) return ''
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+  return data.publicUrl
+}
+
 export const resolveAvisPhotoSrc = (photoUrlOrPath) => {
   if (!photoUrlOrPath || typeof photoUrlOrPath !== 'string') return ''
   const v = photoUrlOrPath.trim()
@@ -114,8 +121,22 @@ export const parseAvisStoragePublicUrl = (url) => {
     const marker = `/object/public/${encodeURIComponent(bucket)}/`
     const idx = url.indexOf(marker)
     if (idx !== -1) {
-      const path = url.slice(idx + marker.length).split('?')[0] || null
-      if (path) return { bucket, path }
+      const raw = url.slice(idx + marker.length).split('?')[0] || null
+      if (raw) {
+        try {
+          return { bucket, path: decodeURIComponent(raw) }
+        } catch {
+          return { bucket, path: raw }
+        }
+      }
+    }
+  }
+  const m = url.match(/\/object\/public\/([^/]+)\/(.+?)(?:\?|$)/)
+  if (m) {
+    try {
+      return { bucket: decodeURIComponent(m[1]), path: decodeURIComponent(m[2]) }
+    } catch {
+      /* ignore */
     }
   }
   return null

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import logo from '../assets/logo.png'
 import { getData, setData, mergeApprocheData } from '../store'
 import CoachingPhotoImg from '../components/CoachingPhotoImg'
-import { supabase, supabaseConfigured, uploadPhoto, publicUrlAfterAvisUpload, resolveAvisPhotoSrc, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
+import { supabase, supabaseConfigured, uploadPhoto, publicUrlAfterAvisUpload, deleteAvisPhotoByUrl, cleanupOrphanAvisPhotos, uploadCoachingPhoto, getCoachingPhotoUrl, deleteCoachingPhotoByUrl, getAvis, getGalerie, getSiteContent, upsertSiteContent } from '../supabaseClient'
+import AvisPhotoImg from '../components/AvisPhotoImg'
 import './Admin.css'
 
 /** Si défini (ex. contact@allotech72.fr), seul ce compte Supabase Auth peut accéder à l’admin. */
@@ -485,7 +486,7 @@ export default function Admin() {
                 <Field label="📷 Photo du client (optionnel)">
                   {a.photo_url && (
                     <div style={{marginBottom:'10px',display:'flex',alignItems:'center',gap:'12px'}}>
-                      <img src={resolveAvisPhotoSrc(a.photo_url)} alt="" style={{width:'52px',height:'52px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}}/>
+                      <AvisPhotoImg src={a.photo_url} alt="" style={{width:'52px',height:'52px',borderRadius:'50%',objectFit:'cover',border:'2px solid var(--c3)'}}/>
                       <button
                         onClick={async () => {
                           try {
