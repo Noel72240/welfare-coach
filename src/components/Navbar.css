@@ -20,9 +20,54 @@
 .ham.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
 .ham.open span:nth-child(2){opacity:0;transform:scaleX(0)}
 .ham.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
-.mmenu{display:none;position:fixed;inset:0;background:var(--c0);z-index:390;flex-direction:column;align-items:center;justify-content:center;gap:28px;opacity:0;transition:opacity .35s}
+/* Menu plein écran au-dessus du contenu ; padding pour ne pas chevaucher le header */
+.mmenu{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--c0);
+  z-index:450;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:clamp(14px,3.5vh,22px);
+  padding:calc(88px + env(safe-area-inset-top,0px)) 24px calc(100px + env(safe-area-inset-bottom,0px));
+  opacity:0;
+  transition:opacity .35s;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  box-sizing:border-box;
+}
 .mmenu.open{display:flex;opacity:1}
-.mmenu a{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--text);text-decoration:none;transition:color .2s}
+.mmenu a{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(24px,7vw,34px);
+  font-weight:300;
+  color:var(--text);
+  text-decoration:none;
+  transition:color .2s;
+  line-height:1.15;
+  text-align:center;
+}
 .mmenu a:hover{color:var(--warm)}
-.mmenu-cta{font-size:20px!important;color:var(--warm)!important;border:1px solid var(--warm);padding:12px 28px}
-@media(max-width:1100px){.navbar ul{display:none}.ham{display:flex}}
+.mmenu-cta{
+  margin-top:8px;
+  font-size:clamp(15px,4vw,18px)!important;
+  color:var(--warm)!important;
+  border:1px solid var(--warm);
+  padding:12px 22px;
+  flex-shrink:0;
+}
+@media(max-width:1100px){
+  .navbar ul{display:none}
+  .ham{
+    display:flex;
+    position:fixed;
+    top:max(16px, env(safe-area-inset-top,0px));
+    right:max(16px, env(safe-area-inset-right,0px));
+    z-index:460;
+    background:rgba(253,250,245,.92);
+    border-radius:10px;
+    box-shadow:0 2px 16px rgba(0,0,0,.06);
+  }
+}

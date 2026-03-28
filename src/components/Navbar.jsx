@@ -15,9 +15,18 @@ export default function Navbar() {
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
-  useEffect(() => { setOpen(false); document.body.style.overflow = '' }, [location])
+  useEffect(() => {
+    setOpen(false)
+    document.body.style.overflow = ''
+    document.body.classList.remove('nav-open')
+  }, [location])
 
-  const toggle = () => { const n = !open; setOpen(n); document.body.style.overflow = n ? 'hidden' : '' }
+  const toggle = () => {
+    const n = !open
+    setOpen(n)
+    document.body.style.overflow = n ? 'hidden' : ''
+    document.body.classList.toggle('nav-open', n)
+  }
   const isA = (p) => location.pathname === p
 
   const links = [['/', 'Accueil'],['/coaching-nutrition-lombron', 'Le Coaching'],['/coach-bien-etre-sarthe', 'Mon Approche'],['/tarifs', 'Tarifs'],['/galerie', 'Galerie'],['/contact', 'Contact'],['/avis', 'Avis Clients']]

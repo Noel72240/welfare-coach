@@ -119,5 +119,24 @@ h3 em{font-style:italic;color:var(--warm)}
 }
 .cookie-settings-btn:hover{background:var(--warm2)}
 
+/* Menu mobile ouvert : bouton / bannière cookies ne recouvrent pas le menu ni le CTA */
+body.nav-open .cookie-settings-btn,
+body.nav-open .cookie-banner{
+  opacity:0!important;
+  pointer-events:none!important;
+  transition:opacity .2s;
+}
+
+@media(max-width:640px){
+  .cookie-settings-btn{
+    left:12px;
+    right:12px;
+    bottom:max(12px, env(safe-area-inset-bottom, 0px));
+    width:auto;
+    max-width:calc(100% - 24px);
+    text-align:center;
+  }
+}
+
 @media(max-width:960px){.sec{padding:72px 5%}.stats-row{grid-template-columns:1fr 1fr}.page-header{padding:110px 5% 50px}}
 @media(max-width:580px){.stats-row{grid-template-columns:1fr}}
